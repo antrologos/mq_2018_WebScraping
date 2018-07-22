@@ -1,5 +1,6 @@
 # Tutorial 9 - twitteR
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 Este tutorial é um rápido guia de como obter dados diretamente da API do Twitter e manipulá-los

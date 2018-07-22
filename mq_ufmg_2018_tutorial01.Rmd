@@ -1,10 +1,11 @@
 # Tutorial 1
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 # Pacotes no R
 
-Algumas das funções que vamos utilizar nesta atividade não estão na biblioteca básica do R. Temos, dessa forma, que começar instalando uma biblioteca chamada "rvest". A biblioteca já está instalada nos computadores que vamos utilizar hoje (espero!). Porém, vamos refazer o processo de instalação para aprender um pouco mais. Execute o comando abaixo:
+Algumas das funções que vamos utilizar nesta atividade não estão na biblioteca básica do R. Temos, dessa forma, que começar instalando uma biblioteca chamada "rvest". Pode ser que esta biblioteca já esteja instalada no seu computador. Porém, vamos refazer o processo de instalação para aprender um pouco mais. Execute o comando abaixo:
 
 ```{r}
 install.packages("rvest")
@@ -31,7 +32,8 @@ library(tidyverse)
 
 Dica: se você "chamar" o pacote _tidyverse_, não precisará chamar _rvest_, pois a função do _tidyverse_ é carregar os pacotes que o compõem.
 
-# Atividade inicial - Pesquisa de Proposições na ALESP
+
+# Atividade inicial - Pesquisa de Proposições na ALESP (Assembléia Legislativa de do Estado de São Paulo)
 
 ## For loop e links com numeração de página
 
@@ -42,7 +44,7 @@ No site, vamos elaborar uma pesquisa qualquer que retorne uma quantidade de resp
 Por exemplo, podemos pesquisar por todas as proposições relacionados à palavra "merenda".
 
 O resultado da pesquisa é dividido em diversas páginas com 10 observações em cada uma.
-Há 4 informações sobre as proposições: data, título (e número do projeto), autor e etapa.
+Há 2 informações sobre as proposições: título (que traz o número do projeto e também a data) e autor.
 
 Podemos prosseguir, clicando nos botões de navegação ao final da página, para as demais páginas da pesquisa. Por exemplo, podemos ir para a página 2 clicando uma vez na seta indicando à direita.
 
@@ -53,14 +55,14 @@ Nossa primeira tarefa consiste em capturar estas informações. Vamos, no decorr
 Vamos armazenar a URL em um objeto ("url_base", mas você pode dar qualquer nome que quiser).
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=1&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=1&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 ```
 
 Há muitas informações nesse link, basicamente todos os campos que poderiam ter sido especificados na busca são apresentados no endereço. Como preenchemos apenas com o termo ("merenda"), esse será o único parametro definido na URL ("text=merenda").
 
-Também podemos observar que a pesquisa retornou 78 páginas ("lastPage=78") e que a página atual (2) é a de número 1 ("currentPage=1") -- a página 1 da pesquisa é numerada como 0 nesta ferramenta de busca, mas o padrão muda de página para página.
+Também podemos observar que a pesquisa retornou 84 páginas ("lastPage=84") e que a página atual (2) é a de número 1 ("currentPage=1") -- a página 1 da pesquisa é numerada como 0 nesta ferramenta de busca, mas o padrão muda de página para página.
 
-Podemos ver que há muitas páginas de resultado para a palavra-chave que utilizamos. Nosso desafio é conseguir "passar" de forma eficiente por elas, ou seja, acessar os 78 links e "raspar" o seu conteúdo. Para isso, usaremos uma função essencial na programação, o "for loop".
+Podemos ver que há muitas páginas de resultado para a palavra-chave que utilizamos. Nosso desafio é conseguir "passar" de forma eficiente por elas, ou seja, acessar os 84 links e "raspar" o seu conteúdo. Para isso, usaremos uma função essencial na programação, o "for loop".
 
 Loops são processos iterativos e são extremamente úteis para instruir o computador a repetir uma tarefa por um número finito de vezes. Por exemplo, vamos começar "imprimindo" na tela os números de 1 a 9:
 
@@ -82,7 +84,7 @@ Tente agora construir um exemplo de loop que imprima na tela os números de 3 a 
 
 ## Substituição com gsub
 
-Ótimo! Já temos alguma intuição sobre como loops funcionam. Podemos agora fazer "passar" pelas páginas que contêm a informação que nos interessa. Temos que escrever uma pequena instrução que indique ao programa que queremos passar pelas páginas de 1 a 78, substituindo apenas o número da página atual -- "currentPage" -- no endereço URL que guardamos no objeto url_base.
+Ótimo! Já temos alguma intuição sobre como loops funcionam. Podemos agora fazer "passar" pelas páginas que contêm a informação que nos interessa. Temos que escrever uma pequena instrução que indique ao programa que queremos passar pelas páginas de 1 a 84, substituindo apenas o número da página atual -- "currentPage" -- no endereço URL que guardamos no objeto url_base.
 
 Nos falta, porém, uma função que nos permita substituir no texto básico do URL ("url_base") os números das páginas.
 
@@ -113,7 +115,7 @@ Vamos substituir na URL da página 2 da nossa busca o número por algo que "guar
 Obs: Lembremos que ao colocar na URL, não devemos usar as aspas. Ainda assim devemos usar aspas ao escrever "NUMPAG" como argumento de uma função, pois queremos dizer que procuramos a palavra "NUMPAG" e não o objeto chamado NUMPAG.
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 ```
 
 Por exemplo, se quisermos gerar o link da página 6, podemos escrever:
@@ -136,7 +138,7 @@ print(url)
 Agora que temos o código substituindo funcionando, vamos implementar o loop para que as URLs das páginas sejam geradas automaticamente. Por exemplo, se quisermos "imprimir" na tela as páginas 0 a 5, podemos usar o seguinte código:
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 
 for(i in 0:5){
   url <- gsub("NUMPAG", i, url_base)
@@ -165,21 +167,24 @@ Nosso objetivo, uma vez que capturamos o conteúdo da página, é extrair de lá
 Vamos ver como ela funciona para a página 2 (ou seja, currentPage=1) contendo a tabela com os resultados em que aparecem o nosso termo pesquisado:
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 
 i <- 1
 url <- gsub("NUMPAG", i, url_base)
 
 pagina <- read_html(url)
 
-lista_tabelas <- html_table(pagina, header = TRUE)
+lista_tabelas <- html_table(pagina, header = TRUE, fill = TRUE)
 
 print(lista_tabelas)
 ```
 
 Simples não? Um pouco bagunçado, mas intuitivo. Geramos um endereço de URL e, com o endereço em mãos, capturamos o conteúdo da página usando o link como argumento da função _read\_html_ para, a seguir, extraírmos uma lista das tabelas da página. Antes de avançar, vamos falar um pouco sobre listas no R (pois o resultado da função _html\_table_ é uma lista).
 
-Note que a função _html\_table_ tem um segundo argumento, "header = TRUE". Esse argumento serve para indicarmos ao nosso "extrator de tabelas HTML" que a primeira linha da tabela deve ser considerada cabeçalho e, portanto, servirá de nome às colunas da tabela.
+Note que a função _html\_table_ tem outros dois argumentos: "header = TRUE" e "fill = TRUE". O primeiro argumento serve para indicarmos ao nosso "extrator de tabelas HTML" que a primeira linha da tabela deve ser considerada cabeçalho e, portanto, servirá de nome às colunas da tabela. O segundo argumento diz para que o R preencha (com espaços vazios) partes da tabela que podem estar incompletas (como, por exemplo, linhas com números desiguais de colunas etc.). Trata-se mais de uma precaução, devida ao fato de que o conteúdo da página pode conter erros ou assimetrias. Neste caso, isto é mesmo verdade. Experimente executar o mesmo comando sem o argumento "fill".
+
+Observe, contudo, que a tabela coletada ainda contém problemas. Há colunas e linhas vazias. Isso é normal. Boa parte do trabalho de coleta de dados da internet consiste exatamente em trabalhar e melhorar a informação que raspamos. E é sobre esse ponto que versará boa parte dos outros tutoriais. Por ora, nos damos por satisfeitos.
+
 
 ## Listas
 
@@ -222,23 +227,25 @@ class(minha.lista[[4]])
 Ao obtermos uma lista de tabelas de uma página (nem sempre vai parecer que todos os elementos são tabelas, mas são, pelo menos para um computador que "lê" HTML), devemos utilizar dois colchetes para extrair a tabela que queremos. Exemplo (no nosso caso já sabemos que a tabela que queremos ocupa a posição 1 da lista, mas é necessário examinar sempre):
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 
 i <- 1
 url <- gsub("NUMPAG", i, url_base)
 
 pagina <- read_html(url)
 
-lista_tabelas <- html_table(pagina)
+lista_tabelas <- html_table(pagina, fill = TRUE)
+
+tabela <- lista_tabelas
+class(tabela) # Uma lista
 
 tabela <- lista_tabelas[[1]]
+class(tabela) # Um data.frame
 
-class(tabela)
-
-View(tabela)
 ```
 
-Bem mais bonito, não?
+'data.frames', como veremos adiante, são os objetos que usualmente conhecemos como "bancos de dados". Ou seja: trata-se de uma organização tabular dos dados, em linhas e colunas. Este é o tipo de resultado que desejamos. Falaremos mais sobre os data.frame adiante.
+
 
 ## Captura das tabelas
 
@@ -249,7 +256,7 @@ Vamos tentar capturar as cinco primeiras páginas do resultado da pesquisa de pr
 Avance devagar neste ponto. Leia o código abaixo com calma e veja se entendeu o que acontece em cada linha. Já temos um primeiro script de captura de dados quase pronto e é importante estarmos seguros para avançar.
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 
 for (i in 0:4) {
   
@@ -257,7 +264,7 @@ for (i in 0:4) {
   
   pagina <- read_html(url)
   
-  lista_tabelas <- html_table(pagina, header = TRUE)
+  lista_tabelas <- html_table(pagina, header = TRUE, fill = TRUE)
   
   tabela <- lista_tabelas[[1]]
   
@@ -297,7 +304,7 @@ Novamente vamos trabalhar apenas com as cinco primeiras páginas, mas bastaria a
 Obs: vamos inserir um "contador" das páginas capturadas com "print(i)". Isso será muito útil quando quisermos capturar um número grande de páginas, pois o contador nos dirá em qual iteração (sic, é sem "n" mesmo) do loop estamos.
 
 ```{r}
-url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=78&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
+url_base <- "http://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=84&currentPage=NUMPAG&act=detalhe&idDocumento=&rowsPerPage=10&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&legislativeNumberMainDoc=&legislativeYearMainDoc=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento=&stageId=&strVotedInitialDate=&strVotedFinalDate="
 
 dados <- data.frame()
 
@@ -309,17 +316,18 @@ for (i in 0:4) {
   
   pagina <- read_html(url)
   
-  lista_tabelas <- html_table(pagina, header = TRUE)
+  lista_tabelas <- html_table(pagina, header = TRUE, fill = T)
   
   tabela <- lista_tabelas[[1]]
   
   dados <- bind_rows(dados, tabela)
 }
+
 ```
 
 Vamos observar o resultado utilizando a função "str" (abreviação de structure), que retorna a estrutura do data frame, e "tail", que é como a função "head", mas retorna as 6 últimas em vez das 6 primeiras observações.
 
-São 50 observações (5 páginas com 10 resultados) e 4 variáveis (data, título, autor, etapa), exatamente como esperávamos. As 4 variáveis são do tipo "character" contêm as informações corretas. As 6 observações apresentam o resultado adequado, o que nos dá uma boa dica que que tudo ocorreu bem até a última página capturada.
+Apesar de que que a tabela contenha 100 linhas, trata-se, na realidade de 50 observações (5 páginas com 10 resultados). As linhas em branco estão duplicando o número de casos. São também apenas 2 variáveis (documento e autor) -- ao invés de 7. Há colunas que foram preenchidas automaticamente... As 2 variáveis são do tipo "character" contêm as informações corretas. As 6 observações apresentam o resultado adequado, o que nos dá uma boa dica que que tudo ocorreu bem até a última página capturada.
 
 ```{r}
 # Estrutura do data frame

@@ -1,5 +1,6 @@
 # Tutorial 11 - Pacote Rfacebook
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 Neste breve tutorial vamos ver como acessar a API do facebook com R e obter dados informaçõs sobre um conjunto limitado de postagens.

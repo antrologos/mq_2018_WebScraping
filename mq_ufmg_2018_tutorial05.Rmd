@@ -1,5 +1,6 @@
 # Tutorial 5 - Análise de texto no R - pacote _stringr_
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 ### Webscrapping para capturar material para o tutorial

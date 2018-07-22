@@ -1,5 +1,6 @@
 # Tutorial 8 - Formulários na web
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 Até agora trabalhamos com exemplos nos quais retiramos informação de páginas em html, mas não enviamos nenhuma informação ao servidor com as quais estamos nos comunicando (exceto manualmente). Contudo, é muito comum nos depararmos com formulários em páginas que queremos raspar. Formulários, na maioria das vezes, aparecerão como caixas de consulta acompanhada de um botão.

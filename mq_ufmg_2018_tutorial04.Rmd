@@ -1,5 +1,6 @@
 # Tutorial 4
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 Nos atividades 1 e 2 utilizamos as ferramentas básicas de captura de dados disponíveis na biblioteca XML. Em primeiro, aprendemos a capturar várias páginas contendo tabelas em formato HTML de uma só vez. Depois, aprendemos como um documento XML está estruturado e que podemos a extrair com precisão os conteúdos de tags e os valores dos atributos das tags de páginas escritas em HTML.

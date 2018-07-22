@@ -1,5 +1,6 @@
 # Tutorial 2
 _Autor_: Leonardo Sangali Barone
+
 _Revisão_: Rogério Jerônimo Barbosa
 
 ## Apresentação do problema
