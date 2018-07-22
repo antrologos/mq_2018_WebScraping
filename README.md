@@ -5,34 +5,38 @@ Bem vind@s à página do curso "Captura, sistematização e análise de dados da
 ## Informações Básicas
 
 Professores: 
+
 Denisson Silva 
+
 Rogério Jerônimo Barbosa
 
+
 Data: 23 de Julho a 27 de Agosto de 2018
+
 Horário: 17h00 às 20h00
 
 ## Aulas
 
-### Dia 1 - 31/07/2017 - O básico da captura de páginas com R - páginas com tabelas
+### Dia 1 - 23/07/2018 - O básico da captura de páginas com R - páginas com tabelas
 
 No primeiro dia do curso faremos uma breve apresentação do curso, da linguagem R e produziremos 2 exemplos simples de captura de dados na internet com páginas que contêm tabelas:
 
 1- Em conjunto, faremos a raspagem dos dados sobre servidores públicos federais no portal da transparência.
 
-2- A  seguir, faremos individualmente ou em pequenos grupos o [Tutorial 1](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial1.Rmd).
+2- A  seguir, faremos individualmente ou em pequenos grupos o [Tutorial 1](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial01.Rmd).
 
-### Dia 2 - 01/08/2017 - O básico da captura de páginas com R - portais de notícias
+### Dia 2 - 24/07/2018 - O básico da captura de páginas com R - portais de notícias
 
 Uma vez que compreendemos a lógica da captura de várias páginas simples com tabela, vamos aprender um pouco sobre HTML e XML para extrair conteúdos quaisquer (e não apenas tabelas) de páginas de internet. 
-Vamos começar a aula com o [Tutorial 2](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial2.Rmd). Neste tutorial, vamos aprender a montar um banco de dados com os títulos e links de notícias resultantes de uma única página de busca em um portal de notícias.
+Vamos começar a aula com o [Tutorial 2](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial02.Rmd). Neste tutorial, vamos aprender a montar um banco de dados com os títulos e links de notícias resultantes de uma única página de busca em um portal de notícias.
 
-A seguir, vamos aproveitar o embalo dos Tutoriais 1 e 2 e aprender a construir um banco de dados com os títulos e links de notícias resultantes de todas as página de busca em um portal de notícias. Faremos isso no [Tutorial 3](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial3.Rmd).
+A seguir, vamos aproveitar o embalo dos Tutoriais 1 e 2 e aprender a construir um banco de dados com os títulos e links de notícias resultantes de todas as página de busca em um portal de notícias. Faremos isso no [Tutorial 3](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial03.Rmd).
 
-Finalmente, vamos contruir um banco de dados de notícias -- título, link, data e hora, e conteúdo no [Tutorial 4](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial4.Rmd).
+Finalmente, vamos contruir um banco de dados de notícias -- título, link, data e hora, e conteúdo no [Tutorial 4](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial04.Rmd).
 
 É possível que não terminemos os 3 tutoriais nesta aula. Não se preocupem. Continuaremos na aula seguinte.
 
-### Dia 3 - 02/08/2017 - Mineração de texto com R - uma introdução breve
+### Dia 3 - 25/07/2018 - Mineração de texto com R - uma introdução breve
 
 Hoje vamos aprender sobre algumas maneiras de trabalharmos com texto como dado no R e conhecer 3 pacotes novos: _stringr_, _tm_ e _tidytext_.
 
@@ -40,50 +44,33 @@ Originalmente, este material fez parte de um programa completo de programação 
 
 Como há vários novos aspectos da linguagem, não exitem em nos chamar para compreender aquilo que é novo ou estranho.
 
-Vamos começar com o [Tutorial 5](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial5.Rmd), que introduz as funções do pacote _stringr_ e captura os dados com os quais vamos trabalhar.
+Vamos começar com o [Tutorial 5](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial05.Rmd), que introduz as funções do pacote _stringr_ e captura os dados com os quais vamos trabalhar.
 
-A seguir, vamos aprender sobre "corpus" com o pacote _tm_. Vá para o [Tutorial 6](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial6.Rmd).
+A seguir, vamos aprender sobre "corpus" com o pacote _tm_. Vá para o [Tutorial 6](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial06.Rmd).
 
-Terminaremos com a abordagem "tidy" para texto (pacote _tidytext_), no [Tutorial 7](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial7.Rmd).
+Terminaremos com a abordagem "tidy" para texto (pacote _tidytext_), no [Tutorial 7](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial07.Rmd).
 
-### Dias 4 e 5 - 03/08/2017 e 04/08/2017 - Tópicos de captura de dados na internet
+### Dias 4 - 26/07/2018 - Tópicos de captura de dados na internet
 
 Nos dois últimos dias do curso vamos trabalhar com tópicos avulsos e ligeiramente mais avançados de captura de dados na internet e/ou em documentos em formato .pdf. Os tópicos são independentes entre si e você pode gerenciar o seu tempo para terminar tutoriais anteriores, estudar material de apoio e avançar nos tutoriais de cada tópico. Minha única recomendação é que você não deixe de fazer o tutorial sobre formulários, pois trata-se de uma "classe" de problemas bastante comum para captura de dados.
 
-- [Formulários Web](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial8.Rmd) - Enviando dados em formulários na web com o pacote _rvest_.
-- [Twitter](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial9.Rmd) - Pacote _twitteR_ para acessar a API do twitter.
-- [PDF](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial10.Rmd) - Transformando arquivos em formato .pdf em texto com o pacote _pdftools_.
-- [Facebook](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial11.Rmd) - Pacote _Rfacebook_ para acessar a API do facebook (bastante limitada).
+- [Tutorial 8 - Formulários Web](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial08.Rmd) - Enviando dados em formulários na web com o pacote _rvest_.
 
-## Extras e materiais de apoio
 
-Os materiais de apoio são os tutoriais do curso "FLS 6397 - Introdução à Programação e Ferramentas Computacionais para as Ciências Sociais" que ministrei no primeiro semestre de 2017 do Departamento de Ciência Política da Universidade de São Paulo. Você pode procurar visitar a página do curso completo [aqui](https://github.com/leobarone/FLS6397).
 
-### R Básico
+### Dias 5 - 27/07/2018 - Tópicos de captura de dados na internet
 
-- Para quem precisa estudar mais sobre data frames e vetores, clique [aqui](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial1.Rmd)
+- [Tutorial 9 - Twitter](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial09.Rmd) - Pacote _twitteR_ para acessar a API do twitter.
+- [Tutorial 10 - PDF](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial10.Rmd) - Transformando arquivos em formato .pdf em texto com o pacote _pdftools_.
+- [Tutorial 11 - Facebook](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial11.Rmd) - Pacote _Rfacebook_ para acessar a API do facebook (bastante limitada).
 
-- Para aprender sobre as funcionalidades básicas do R, veja este [tutorial](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial2.Rmd)
 
-- Finalmente, este terceiro [tutorial](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial3.Rmd) trata de operadores relacionais e lógicos, cláusulas condicionais, loops e funções.
 
-### Manipulação de dados no R
-
-- Se você quer ver um pouco mais sobre abertura de dados no R, veja este [tutorial](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial4.Rmd)
-
-- Para aprender sobre manipulação de dados com a gramática básica do R, leia este [aqui](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial5.Rmd)
-
-- Finalmente, se quiser aprender sobre o pacote _dplyr_ faça os sobre o [básico do _dplyr_](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial6.Rmd) e [bases de dados relacionais com dplyr](https://github.com/leobarone/FLS6397/blob/master/tutorials/tutorial7.Rmd) 
 
 ### R for Data Science
 
 Uma das melhores referências para estudar ciência de dados com R é o livro [R for Data Science](http://r4ds.had.co.nz/) de Grolemund e Wickham. O livro é online gratuito. Sugiro utilizá-lo como material de apoio durante o curso e é a leitura que recomendo após finalizarmos.
 
-### Captcha e Curso-R
-
-Uma fonte bastante interessante sobre R em português é o [Curso-R](http://curso-r.com), desenvolvido pelo pessoal do IME-USP. Vale a pena acompanhar.
-
-Recentemente, há uma sequência de posts sobre como quebrar captcha com R no blog, [aqui](http://curso-r.com/tags/captcha/). Sugiro a leitura para quem se deparar com captchas em uma captura de dados.
 
 ## Atividade de avaliação
 
