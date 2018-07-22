@@ -1,4 +1,6 @@
 # Tutorial 1
+_Autor_: Leonardo Sangali Barone
+_Revisão_: Rogério Jerônimo Barbosa
 
 # Pacotes no R
 

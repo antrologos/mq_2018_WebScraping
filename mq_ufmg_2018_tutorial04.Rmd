@@ -1,4 +1,6 @@
 # Tutorial 4
+_Autor_: Leonardo Sangali Barone
+_Revisão_: Rogério Jerônimo Barbosa
 
 Nos atividades 1 e 2 utilizamos as ferramentas básicas de captura de dados disponíveis na biblioteca XML. Em primeiro, aprendemos a capturar várias páginas contendo tabelas em formato HTML de uma só vez. Depois, aprendemos como um documento XML está estruturado e que podemos a extrair com precisão os conteúdos de tags e os valores dos atributos das tags de páginas escritas em HTML.
 
@@ -10,7 +12,7 @@ Clique no [link](http://search.folha.uol.com.br/search?q=elei%E7%F5es&site=dataf
 
 Antes de começar, vamos chamar a biblioteca _rvest_ para tornar suas funções disponíveis em nossa sessão do R. Na carona, vamos chamar também a biblioteca _dplyr_.
 
-```{r}
+```{r, echo = FALSE}
 library(rvest)
 library(dplyr)
 ```
@@ -108,7 +110,7 @@ print(link_pdf)
 
 Usando a função _download.file_, rapidamente salvamos o link no "working directory" (use "getwd()" para descobrir qual é o seu) e com o nome "pesquisa.pdf" (poderíamos salvar com o nome que quisessemos):
 
-```{r}
+```{r, echo = F}
 getwd()
 download.file(link_pdf, "pesquisa.pdf", mode = 'wb')
 ```
@@ -137,7 +139,7 @@ Vamos construir o código da primeira etapa da captura e, uma vez resolvida a pr
 
 ### Código da etapa 1
 
-AVISO: Esse código é bastante semelhante ao código do [Tutorial 3](https://github.com/leobarone/mq_ufmg_17/blob/master/mq_ufmg_2017_tutorial3.Rmd). Mudam apenas os urls e o xpath. Você pode passar por ele repidamente se quiser.
+AVISO: Esse código é bastante semelhante ao código do [Tutorial 3](https://github.com/antrologos/mq_2018_WebScraping/blob/master/mq_ufmg_2018_tutorial03.Rmd). Mudam apenas os urls e o xpath. Você pode passar por ele repidamente se quiser.
 
 Comecemos criando o URL base sem a numeração de notícias:
 
@@ -150,7 +152,7 @@ Em segundo lugar, vamos observar o URL da página de busca (poderíamos buscar t
 Precisamos, então, que "i" seja recalculado dentro do loop para coincidir com a numeração da primeira notícia de cada página. Parece difícil, mas é extremamente simples. Veja o loop abaixo, que imprime a sequência desejada multiplicando (i - 1) por 25 e somando 1 ao final:
 
 ```{r}
-for (i in 1:23){
+for (i in 1:5){
   i <- (i - 1) * 25 + 1
   print(i)
 }
@@ -193,6 +195,8 @@ Usaremos a função _bind\_rows_ (ou _rbind_ se estiver com problemas com o _dpl
 
 ```{r}
 library(dplyr)
+
+dados_pesquisa <- data.frame()
 dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 ```
 
@@ -206,7 +210,7 @@ url_base <- "http://search.folha.uol.com.br/search?q=elei%E7%F5es&site=datafolha
 
 dados_pesquisa <- data_frame()
 
-for (i in 1:23){
+for (i in 1:5){
   
   print(i)
 
@@ -221,7 +225,8 @@ for (i in 1:23){
   titulos <- html_text(nodes_titulos)
   links <- html_attr(nodes_titulos, name = "href")
   
-  tabela_titulos <- data.frame(titulos, links)
+  tabela_titulos <- data.frame(titulos, links, 
+                               stringsAsFactors = F)
   
   dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 }
@@ -256,7 +261,7 @@ Para fazermos a captura de todos os links em "loop" deve ter o seguinte aspecto,
 
 Esses endereços estão armazenados na variável "links" do banco de dados que criamos na Etapa 1, "dados\_pesquisa". Assim, na primeira iteração temos que "link" será igual "dados_pesquisa\$links[1]", na segunda "dados_pesquisa\$link[2]" e assim por diante até a última posição do vetor "links_datafolha" -- no nosso caso a posição 558.
 
-```{r}
+```{r, eval = F}
 for (link in dados_pesquisa$links){
   print(link)
 }
@@ -264,13 +269,17 @@ for (link in dados_pesquisa$links){
 
 Combinando os dois código, e criando um data frame "dados\_noticias" que é vazio antes do loop temos o código completo da captura. Tal como quando trabalhamos com tabelas, utilizando a função "bind_rows" para combinar o data frame que resultou da iteração anterior com a linha que combina o conteúdo armazenado em "titulo", "datahora" e "texto".
 
-```{r}
+```{r, echo = F}
 dados_noticias <- data.frame()
 
 for (link in dados_pesquisa$links){
   print(link)
   
-  pagina <- read_html(link)
+  # Algumas páginas podem ter links quebrados. Por esta razão, fazemos:
+  pagina <- try(expr = read_html(link), silent = T)  
+  if(any(class(pagina) %in% "try-error")){
+          next
+  }
   
   node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
   titulo <- html_text(node_titulo)
@@ -303,7 +312,7 @@ url_base <- "http://search.folha.uol.com.br/search?q=elei%E7%F5es&site=datafolha
 
 dados_pesquisa <- data_frame()
 
-for (i in 1:23){
+for (i in 1:5){
   
   print(i)
   
@@ -311,7 +320,11 @@ for (i in 1:23){
   
   url_pesquisa <- paste(url_base, i, sep = "")
   
-  pagina <- read_html(url_pesquisa)
+  # Como no caso anterior, algumas páginas podem ter links quebrados...
+  pagina <- try(expr = read_html(link), silent = T)  
+  if(any(class(pagina) %in% "try-error")){
+          next
+  }
   
   nodes_titulos <- html_nodes(pagina, xpath = "//h2/a")
   
@@ -328,7 +341,11 @@ dados_noticias <- data.frame()
 for (link in dados_pesquisa$links){
   print(link)
   
-  pagina <- read_html(link)
+  # Já viram isso antes, né? Então... páginas com links quebrados etc.
+  pagina <- try(expr = read_html(link), silent = T)  
+  if(any(class(pagina) %in% "try-error")){
+          next
+  }
   
   node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
   titulo <- html_text(node_titulo)

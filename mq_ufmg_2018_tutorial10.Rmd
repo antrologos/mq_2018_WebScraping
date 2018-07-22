@@ -1,4 +1,6 @@
 # Tutorial 10 - Arquivos em formato .pdf no R
+_Autor_: Leonardo Sangali Barone
+_Revisão_: Rogério Jerônimo Barbosa
 
 Boa parte da informação disponibilizada por governos ou oganizações empresariais na internet está em formato .pdf. Neste tutorial vamos ver como obter textos contidos em um documento neste formato e treinar um exemplo que combina webscraping e arquivos em .pdf com dados da Câmara dos Deputados.
 

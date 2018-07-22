@@ -1,4 +1,6 @@
 # Tutorial 6 - Análise de texto no R - pacote _tm_
+_Autor_: Leonardo Sangali Barone
+_Revisão_: Rogério Jerônimo Barbosa
 
 ## Corpus e o pacote _tm_
 

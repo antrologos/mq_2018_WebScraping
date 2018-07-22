@@ -1,4 +1,6 @@
 # Tutorial 7 - Análise de texto no R - pacote _tidytext_
+_Autor_: Leonardo Sangali Barone
+_Revisão_: Rogério Jerônimo Barbosa
 
 ## Uma abordagem "tidy" para texto
 

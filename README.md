@@ -10,10 +10,15 @@ Denisson Silva
 
 Rogério Jerônimo Barbosa
 
-
 Data: 23 de Julho a 27 de Agosto de 2018
 
 Horário: 17h00 às 20h00
+
+
+## Elaboração d
+
+Leonardo Sangali Barone
+
 
 ## Aulas
 
