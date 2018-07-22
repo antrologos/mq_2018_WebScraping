@@ -1,16 +1,15 @@
-# MQ-UFMG 2017 - Captura, sistematização e análise de dados da web com R
+# MQ-UFMG 2018 - Web Scraping: Captura e análise de dados da web com R
 
 Bem vind@s à página do curso "Captura, sistematização e análise de dados da web com R". Nesta página você encontrará os tutoriais, dados, e demais materiais que utilizaremos no curso, organizados por dia.
 
 ## Informações Básicas
 
-Professor: Leonardo Sangali Barone [leobarone@gmail.com](leobarone@gmail.com)
+Professores: 
+Denisson Silva 
+Rogério Jerônimo Barbosa
 
-Assistente: Lucas Gelape
-
-Data: 31 de Julho a 04 de Agosto de 2017
-
-Horário: 13h30 às 16h30
+Data: 23 de Julho a 27 de Agosto de 2018
+Horário: 17h00 às 20h00
 
 ## Aulas
 
