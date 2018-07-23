@@ -13,6 +13,53 @@ Carregue o pacote:
 library(tm)
 ```
 
+Neste tutorial, vamos trabalhar com o mesmo material do tutorial anterior: os discursos parlamentares de uma deputada federal, raspados diretamente do site da Câmara dos Deputados. Neste exemplo, tomaremos os discursos da parlamentar Luiza Erundina. 
+
+Façamos então a coleta desse material, reproduzindo o que já fizemos anteriormente:
+
+```{r}
+library(rvest)   # nossas funções de web scraping
+library(dplyr)   # para podermos usar o pipe
+library(stringr) # funções para manipular texto. Temos que arrumar as URLs...
+
+# Nesta página está a lista dos primeiros 50  discursos existentes
+url_tabela_discursos <- "http://www.camara.leg.br/internet/sitaqweb/resultadoPesquisaDiscursos.asp?txOrador=Luiza+Erundina&txPartido=PSOL&txUF=SP&dtInicio=&dtFim=&txTexto=&txSumario=&basePesq=plenario&CampoOrdenacao=dtSessao&PageSize=50&TipoOrdenacao=DESC&btnPesq=Pesquisar"
+
+# Raspamos os links:
+url_discursos <- url_tabela_discursos %>%
+        read_html() %>%
+        html_nodes(xpath = "//a[contains(@title, 'do Discurso')]") %>%
+        html_attr(name = "href")
+
+# Os links vieram todos sem o início... lembra? Temos que concatenar isso:
+url_discursos <- str_c("http://www.camara.leg.br/internet/sitaqweb/", url_discursos)
+
+# E, além disso, contém espaços e quebras de linha. Temos que removê-los:
+url_discursos <- str_replace_all(url_discursos, "[[:space:]]", "") # procure saber mais sobre "expressões
+
+# Criamos um objeto temporário que receberá os resultados acumulados
+discursos <- c()
+
+# Iniciamos o loop que percorrerá cada um dos links
+for (i in 1:length(url_discursos)) {
+  
+  print(i)
+  
+  url_discurso <- url_discursos[i]
+        
+  discurso <- url_discurso %>%
+    read_html() %>%
+    html_nodes(xpath = "//div[@id  = 'content']//p") %>%
+    html_text()
+  
+  discursos <- c(discursos, discurso)
+  
+  Sys.sleep(0.3) # aquele mesmo tempinho entre uma coleta e outra... pra não sobrecarregar o servidor da Câmara e evitar erros ou até mesmo o bloqueio de nossa raspagem
+}
+
+```
+
+
 Uma boa prática ao trabalharmos com texto é transformarmos todas as palavras em minúsculas (exceto, obviamente, quando a diferenciação importar). _tolower_, função da biblioteca básica do R, cumpre a tarefa e vamos criar um objeto "discursos2", que será nossa versão modificada dos discursos.
 
 ```{r}
@@ -68,7 +115,7 @@ E vamos repetir nossa nuvem de palavras:
 wordcloud(discursos2, max.words = 50)
 ```
 
-Muito mais interessante, não?
+Um pouco mais interessante, não?
 
 Note, porém, o destaque a "presidente". A deputada faz referências ao presidente da Câmara em praticamente todos os seus discursos e isso aumenta demais a frequência desta palavra. O mesmo ocorre com "luiza" e "erundina", já que todas as vezes em que inicia uma fala, seu nome é transcrito.
 
@@ -97,7 +144,7 @@ stemDocument(c("politics", "political", "politically"), language = "english")
 Vamos ver o resultado da função _stemDocument_ no primeiro discurso:
 
 ```{r}
-discursos4 <- stemDocument(discursos2, language = "portuguese")
+discursos4 <- stemDocument(discursos3, language = "portuguese")
 discursos4[1]
 ```
 
@@ -155,9 +202,8 @@ Aliás, metadados são a única boa razão para trabalharmos com Corpus e não c
 Vamos reabrir os dados usando um data frame como fonte. Vamos criar um:
 
 ```{r}
-discursos_df <- data.frame(id_discurso = 1:length(discursos), 
-                          text = discursos,
-                           stringsAsFactors = F)
+discursos_df <- data_frame(doc_id = 1:length(discursos),  #os nomes das variáveis deve ser esses...
+                           text = discursos)
 str(discursos_df)
 ```
 
@@ -184,11 +230,18 @@ discursos_corpus <- tm_map(discursos_corpus, content_transformer(tolower))
 
 Se você criar uma função para alteração de um texto, você deve utilizar _content\_transformer_ também.
 
-Mais dois exemplos, com _removeNumbers_ e _removeWords_:
+Agora, removemos os números e as "stop words" usando _removeNumbers_ e _removeWords_:
 
 ```{r}
 discursos_corpus <- tm_map(discursos_corpus, removeNumbers)
 discursos_corpus <- tm_map(discursos_corpus, removeWords, stopwords("pt"))
+```
+
+Por último, aplicamos o "stem" para obter aquelas palavras truncadas, que pretensamente seriam análogas aos radicais linguísticos:
+
+```{r}
+discursos_corpus <- tm_map(discursos_corpus, stemDocument)
+
 ```
 
 Porque tanto trabalho? Para trabalharmos com Corpus, que tem a vantagem de armazenar os metadados, em vez de um vetor.
@@ -202,6 +255,7 @@ limpa_corpus <- function(corpus){
   corpus <- tm_map(corpus, content_transformer(tolower))
   corpus <- tm_map(corpus, removeNumbers)
   corpus <- tm_map(corpus, removeWords, stopwords("pt"))
+  corpus <- tm_map(corpus, stemDocument)
 
   corpus
 }
@@ -221,16 +275,22 @@ O principal uso do pacote _tm_ é gerar uma matriz de documentos-termos ("dtm").
 dtm_discursos <- DocumentTermMatrix(discursos_corpus)
 ```
 
-Veja um fragmento da "dtm" que criamos (documentos 101 a 105 e termos 996 a 1000):
+O que criamos foi uma grande matriz de documentos (na linha) por termos (na coluna). Veja o tamanho que ela tem:
 
 ```{r}
-as.matrix(dtm_discursos[101:105, 996:1000])
+dim(dtm_discursos)
 ```
 
-Se quisermos rapidamente olhar os termos com frequência maior do que, digamos, 500:
+E veja um pequeno fragmento dessa "dtm" (esse é o nome da classe do objeto) que criamos (documentos 45 a 50 e termos 10 a 20):
 
 ```{r}
-findFreqTerms(dtm_discursos, 500)
+as.matrix(dtm_discursos[45:50, 10:20])
+```
+
+Se quisermos rapidamente olhar os termos com frequência maior do que, digamos, 50:
+
+```{r}
+findFreqTerms(dtm_discursos, 50)
 ```
 
 Há uma série de usos para a classe Corpus do pacote _tm_ para mineração de texto. Não vamos explorá-los e você pode buscar sozinh@. Vamos adotar agora uma abordagem que não envolve a criação de um Corpus.

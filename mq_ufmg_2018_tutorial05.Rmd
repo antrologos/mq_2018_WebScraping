@@ -48,10 +48,12 @@ Vamos agora passar por todos os urls e obter os discursos. Examine a primeira ur
 
 ```{r}
 discursos <- c()
-for (url_discurso in 1:length(url_discursos)) {
+for (i in 1:length(url_discursos)) {
   
   print(i)
-        
+  
+  url_discurso <- url_discursos[i]
+          
   discurso <- url_discurso %>%
     read_html() %>%
     html_nodes(xpath = "//div[@id  = 'content']//p") %>%
@@ -59,7 +61,7 @@ for (url_discurso in 1:length(url_discursos)) {
   
   discursos <- c(discursos, discurso)
   
-  Sys.sleep(0.3)
+  Sys.sleep(0.3) # entre cada uma das raspagens, damos um tempinho... para não sobrecarregar o servidor
 }
 ```
 
