@@ -86,7 +86,7 @@ Poderíamos usar o vetor lógico resultante para gerar um subconjunto dos discur
 discursos_constituicao <- str_subset(discursos, "Constituição")
 ```
 
-Se quisessemos apenas a posição no vetor dos discursos que contêm "Constituição", _str\_which_ faria o trabalho:
+Se quisessemos apenas a posição no vetor dos discursos que contêm "Constituição", _str\_which_ faria o trabalho (função semelhante à _grep_ do R Base):
 
 ```{r}
 str_which(discursos, "Constituição")
@@ -144,4 +144,4 @@ library(wordcloud)
 wordcloud(discursos, max.words = 50)
 ```
 
-Não muito bonita. Voltaremos a fazer nuvem de palavras depois de aprendermos outra maneiras de trabalharmos com texto como dado no R.
+Ainda não está não muito bonita... Mas vai melhorar! Voltaremos a fazer nuvem de palavras depois de aprendermos outra maneiras de trabalharmos com texto como dado no R. Veja o Tutorial 6!

@@ -1,4 +1,4 @@
-# Tutorial 7 - Análise de texto no R - pacote _tidytext_
+# Tutorial 7 - Mais funções para análise de texto no R - o pacote _tidytext_
 _Autor_: Leonardo Sangali Barone
 
 _Revisão_: Rogério Jerônimo Barbosa
@@ -7,9 +7,9 @@ _Revisão_: Rogério Jerônimo Barbosa
 
 Corpora são os objetos clássicos para processamento de linguagem natural. No R, porém, há uma tendência a deixar tudo "tidy". Vamos ver uma abordagem "tidy", ou seja, com data frames no padrão do _tidyverse_, para texto.
 
-Vamos fazer uma rápida introdução, mas recomendo fortemente a leitura do livro [Text Mininig with R](http://tidytextmining.com/), disponível o formato "bookdown".
+Vamos fazer uma rápida introdução, mas recomendo fortemente a leitura do livro [Text Mininig with R](http://tidytextmining.com/), disponível no formato "bookdown".
 
-Comecemos carregando os seguintes pacotes:
+Comecemos carregando os seguintes pacotes (Se não possui algum deles, instale! E não se esqueça de instalar também as dependências com o argumento `dep = TRUE`):
 
 ```{r}
 library(tidytext)
@@ -18,35 +18,84 @@ library(ggplot2)
 library(tidyr)
 ```
 
+Vamos usar o mesmo material do Tutorial anterior (discursos da Erundina), que já haviam sido também utilizados no Tutorial 5. Mas desta vez vamos tentar coletar todos os discursos. Na data de fechamento deste material (23/07/2018) eram 135 discursos. Como o site da câmara exibe apenas 50 resultados por página, devemos fazer 3 iterações com um loop para coletar primeiramente os links. Só depois passaremos ao loop que percorre cada um deles e raspa os conteúdos.
+
+Como se trata de muito mais conteúdo, vai levar um tempinho para que a coleta seja concluída. Mas mãos à obra!
+
+```{r}
+library(rvest)   
+library(stringr) 
+
+# Substituimos o número da página por XXXXX
+url_base <- "http://www.camara.leg.br/internet/sitaqweb/resultadoPesquisaDiscursos.asp?txIndexacao=&CurrentPage=XXXXX&BasePesq=plenario&txOrador=Luiza%20Erundina&txPartido=PSOL&dtInicio=&dtFim=&txUF=SP&txSessao=&listaTipoSessao=&listaTipoInterv=&inFalaPres=&listaTipoFala=&listaFaseSessao=&txAparteante=&listaEtapa=&CampoOrdenacao=dtSessao&TipoOrdenacao=DESC&PageSize=50&txTexto=&txSumario="
+
+url_discursos <- NULL
+for(num_pag in 1:3){
+        
+        print(num_pag)
+        
+        url <- str_replace(url_base, "XXXXX", as.character(num_pag))
+        
+        url_discursos_tmp <- url %>%
+                read_html() %>%
+                html_nodes(xpath = "//a[contains(@title, 'do Discurso')]") %>%
+                html_attr(name = "href") %>%
+                str_c("http://www.camara.leg.br/internet/sitaqweb/", .) %>%
+                str_replace_all("[[:space:]]", "")
+        
+        url_discursos = c(url_discursos, url_discursos_tmp)
+}
+
+
+discursos <- c()
+for (i in 1:length(url_discursos)) {
+  print(i)
+  url_discurso <- url_discursos[i]
+        
+  discurso <- url_discurso %>%
+    read_html() %>%
+    html_nodes(xpath = "//div[@id  = 'content']//p") %>%
+    html_text()
+  
+  discursos <- c(discursos, discurso)
+  Sys.sleep(0.3) 
+}
+```
+
 Vamos recriar o data frame com os discursos:
 
 ```{r}
-discursos_df <- data_frame(id_discurso = 1:length(discursos), 
-                          text = discursos)
+discursos_df <- data_frame(doc_id = 1:length(discursos), 
+                           text   = discursos)
 glimpse(discursos_df)
 ```
 
+Criar data.frames... esse é o segredo da abordagem _tidy_ da análise de textos. Não vamos trabalhar com um objeto mais complexo (e até um pouco estranho...) que são os `corpus` do pacote _tm_, tal como havíamos feito no tutorial anterior. 
+
+Utilizamos bancos de dados para a maioria de nossas análises, certo? A organização tabular (em linhas e colunas) é basicamente o padrão quando realizamos análises estatísticas. Bem... o pacote _tidytext_ visa exatamente nos manter nesse território conhecido, para o qual temos ferramentas também conhecidas e mais amplas.
+
+
 ### Tokens
 
-A primeira função interessante do pacote _tidytext_ é justamente a tokenização de um texto:
+A primeira função interessante do pacote _tidytext_ é justamente a tokenização de um texto (lembra o que é isso? dê uma relembrada, olhando o Tutorial anterior). Veja como funciona:
 
 ```{r}
 discursos_token <- discursos_df %>%
-  unnest_tokens(word, text)
+  unnest_tokens(output = word, input = text) # nome das variáveis de saida (a ser criada) e entrada (nossos textos)
 glimpse(discursos_token)
 ```
 
-Note que a variável _id\_discurso, criada por nós, é mantida. "text", porém, se torna "words", na exata sequência do texto. Veja que o formato de um "tidytext" é completamnte diferente de um Corpus.
+Note que a variável _doc\_id_, criada por nós, é mantida. "text", porém, se torna "words", na exata sequência do texto. Veja que o formato de um "tidytext" é completamnte diferente de um Corpus.
 
-Como excluir stopwords nessa abordagem? Precisamos de um data frame com stopwords. Vamos recriar um vetor stopwords_pt, que é a versão ampliada das stopwords disponíveis no R, e criar um data frame com tal vetor:
+Como excluir stopwords nessa abordagem? Já adiantamos que os data frames são a chave da abordagem tidy, certo? Então, é isso! **Precisamos de um data frame com stopwords**! Vamos recriar um vetor stopwords_pt, que é a versão ampliada das stopwords disponíveis no R, e criar um data frame com tal vetor:
 
 ```{r}
 stopwords_pt <- c(stopwords("pt"), "presidente", "é", "sr", "sra", "luiza", 
                   "erundina", "oradora", "revisão", "sp", "v.exa")
-stopwords_pt_df <- data.frame(word = stopwords_pt)
+stopwords_pt_df <- data_frame(word = stopwords_pt)
 ```
 
-Com _anti\_join_ (lembra dessa função?) mantemos em "discursos\_token" apenas as palavras que não estao em "stopwords\_pt\_df"
+Com _anti\_join_ (Já viu essa função? Ela é do pacote dplyr. Procure-a no _help_!) mantemos em "discursos\_token" apenas as palavras que não estao em "stopwords\_pt\_df"
 
 ```{r}
 discursos_token <- discursos_token %>%
@@ -60,12 +109,12 @@ discursos_token %>%
   count(word, sort = TRUE)
 ```
 
-Com _ggplot_, podemos construir um gráfico de barras dos temos mais frequêntes, por exemplo, com frequência maior do que 500. Neste ponto do curso, nada do que estamos fazendo abaixo deve ser novo a você:
+Com _ggplot_, podemos construir um gráfico de barras dos temos mais frequêntes, por exemplo, com frequência maior do que 50. Neste ponto do curso, nada do que estamos fazendo abaixo deve ser novo a você:
 
 ```{r}
 discursos_token %>%
   count(word, sort = TRUE) %>%
-  filter(n > 500) %>%
+  filter(n > 50) %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n)) +
     geom_col() +
@@ -76,9 +125,11 @@ discursos_token %>%
 Incorporando a função _wordcloud_ a nossa análise:
 
 ```{r}
+library(wordcloud)
+
 discursos_token %>%
   count(word, sort = TRUE) %>%
-  with(wordcloud(word, n, max.words = 50))
+  with(wordcloud(word, n, max.words = 50, scale = c(3, .4)))
 ```
 
 A abordagem "tidy" para texto nos mantém no território confortável da manipulação de data frames e, particularmente, me parece mais atrativa do que a abordagem via Corpus para um conjunto grande de casos.
@@ -90,6 +141,12 @@ Já produzimos duas vezes a tokenização do texto, sem, no entanto, refletir so
 ```{r}
 discurso_bigrams <- discursos_df %>%
   unnest_tokens(bigram, text, token = "ngrams", n = 2)
+```
+
+Veja com fica:
+
+```{r}
+print(discurso_bigrams)
 ```
 
 Note que, ao tokenizar o texto, automaticamente foram excluídas as as pontuações e as palavras foram alteradas para minúscula (use o argumento "to_lower = FALSE" caso não queira a conversão). Vamos contar os bigrams:
@@ -136,11 +193,11 @@ bigrams_united <- bigrams_filtered %>%
   unite(bigram, word1, word2, sep = " ")
 ```
 
-A abordagem "tidy" traz uma tremenda flexibilidade. Se, por exemplo, quisermos ver com quais palavras a palavra "poder" é antecedida:
+A abordagem "tidy" traz uma tremenda flexibilidade. Se, por exemplo, quisermos ver com quais palavras a palavra "casa" é antecedida:
 
 ```{r}
 bigrams_filtered %>%
-  filter(word2 == "poder") %>%
+  filter(word2 == "casa") %>%
   count(word1, sort = TRUE)
 ```
 
@@ -185,8 +242,6 @@ discursos_df %>%
   count(word1, word2, word3, sort = TRUE)
 ```
 
-"sociedade civil organizada" é o "trigram" mais frequente no discurso da deputada.
-
 ### Redes de palavras
 
 Para encerrar, vamos a um dos usos mais interessantes do ngrams: a construção de redes de palavras. Precisaremos de dois novos pacotes, _igraph_ e _ggraph_. Instale-os se precisar:
@@ -200,7 +255,7 @@ Em primeiro lugar, transformaremos nosso data frame em um objeto da classe _igra
 
 ```{r}
 bigram_graph <- bigram_counts %>%
-  filter(n > 20) %>%
+  filter(n > 10) %>%
   graph_from_data_frame()
 ```
 
