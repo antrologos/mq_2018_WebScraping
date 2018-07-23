@@ -11,7 +11,40 @@ Neste tutorial vamos aprender a preencher um formulário, enviá-lo ao servidor 
 
 Começaremos com um exemplo simples, como o buscador da Google, e depois faremos um exercício bastante mais complexo com o STF.
 
+
+## Cookies e Sessions
+
+Guarde bem essas duas palavras: _cookies_ e _sessions_. Elas representam conceitos fundamentais para uma adequada compreensão sobre o funcionamento da internet, dos navegadores -- e importantíssimos para a raspagem de dados ( _Web_ _Scraping_ ) de certas páginas.
+
+### Cookies
+
+**Cookies** são pequenos arquivos de texto que guardam informações necessárias para a sua navegação. Por exemplo: se você vai até o site do IBGE e escolhe a opção de vê-lo na versão em inglês, como o IBGE sabe que a partir dali todas as próximas páginas e opções também deverão ser apresentadas em inglês? No  momento em que você clicou naquela opção, o seu navegador automaticamente baixou um arquivo que guarda características e opções que serão usadas novamente depois. Frequentemente, é também por meio de cookies que são guardadas informações sobre o que está na sua "cesta de compras", quando você marca produtos que deseja adquirir num site de vendas. Cookies são muito úteis e importantes -- essenciais para a navegação. 
+
+Até agora, quando queremos raspar dados de uma lista com várias páginas de resultado, fizemos sempre alterações na própria URL, informando o número da página que desejamos acessar. Mas nem sempre isso é possível, pois nem todos os sites guardam no próprio endereço a informação sobre o número da página em que estamos. Não raro, essa informação está guardada num cookie! Sim, um pequeno arquivo de texto, guardado em algum lugar do seu próprio computador, traz informações que serão dinamicamente acessadas por seu navegador e atualizadas. 
+
+Talvez você já tenha ouvido algo bastante ruim sobre cookies por aí... dizendo até que são usados por hackers etc. A história é mais complicada do que isso... A princípio, somente o site que gerou o cookie pode consultá-lo para saber sobre suas opções. Mas, às vezes, esse site pode passar essas informações para outro (várias empresas são associadas, certo?). Então, quando você vai até a Amazon e escolhe alguns produtos para sua cesta, pode ser que, algum tempo depois você veja aqueles mesmos itens num anúncio na página do Google ou até de outro lugar. Provavelmente aquela informação estava num cookie e a Amazon pode ter liberado o acesso para outra empresa. O objetivo, é tornar sua navegação mais customizada e personalizada, oferecendo para você apenas o que é relevante. As empresas querem vender para você aquilo que você realmente tem probabilidade de comprar...
+
+Este pequeno vídeo [aqui](https://www.youtube.com/watch?v=I01XMRo2ESg) (em inglês) traz um bom resumo e panorama sobre o que são cookies. Quer algo um pouquinho mais técnico? Veja este curto vídeo [aqui](https://www.youtube.com/watch?v=LHSSY8QNvew) então.
+
+"Roubar" informações de cookies é possível. Mas não é isso o que está ocorrendo quando você visita um site e os anúncios de coisas que você já viu estão lá. Quer saber mais sobre roubo de Cookies? Veja este vídeo [aqui](https://www.youtube.com/watch?v=T1QEs3mdJoc).
+
+Cookies, no entanto, devem ser pequenos. Afinal, são informações continuamente trocadas entre você (cliente) e o computador que armazena o site no qual você navega (servidor). Se ele fosse um arquivo grande, o fluxo de uploads e downloads seriam muito intenso e a navegação se tornaria muito mais lenta. Por esta razão, existem **sessions**, que servem para guardar conteúdos maiores.
+
+
+### Sessions
+
+**Sessions** são a relação estabelecida entre o servidor (o site) e o cliente (o seu navegador). Um arquivo ou um conjunto de arquivos guardam um complexo de informações sobre você -- que vão muito além da capacidade dos cookies (que usualmente não podem ultrapassar 4kb). Essas informações podem estar guardadas tanto localmente (no seu próprio coputador) como remotamente (no servidor). Se estiverem guardadas localmente, a navegação é geralmente mais rápida -- visto que você não precisa trocar requisições usualmente com o servidor. 
+
+Entenda as sessions como uma espécie de "conta" que você abre no servidor (dessas contas que uma pessoa pode abrir num estabelecimento de comércio e que guardam suas informações e interações). E os cookies são usados nesse caso apenas como uma espécie de ID (seu cartão de identidade) para registrar você frente ao servidor.
+
+Quando você loga na sua conta de e-mail, está abrindo uma session. Está dizendo ao seu navegador para estabelecer essa relação duradoura com o servidor (o site do Gmail, por exemplo). Assim, quando você navega dentro do seu email, não precisa a todo momento fazer o login de novo. Suas informações estão guardadas nesse conjunto de arquivos que representa a session. E cookies serão frequentemente usados, para mostrar ao site do Gmail o seu ID.
+
+Quer saber mais sobre sessions? Neste [vídeo](https://www.youtube.com/watch?v=64veb6tKTm0) (em inglês) há uma rápida e intuitiva apresentação.
+
+
 ## _rvest_, formulários e Google 
+
+Agora, com aqueles dois conceitos na ponta da língua -- **cookies** e **sessions** -- vamos passar às nossas análises. 
 
 Vamos começar carregando o pacotes _rvest_:
 
@@ -19,7 +52,11 @@ Vamos começar carregando o pacotes _rvest_:
 library(rvest)
 ```
 
-Nosso primeiro passo ao lidar com formulários será estabelecer uma conexão com o servidor, antes mesmo de capturar a página na qual o formulário está. Damos a essa conexão o nome de "session", e utilizamos a função _html\_session_ para criá-la:
+Vamos explorar o buscador do Google. Isso mesmo, vamos fazer uma busca no Google a partir do R! O buscador do Google é constituído basicamente de um campo de texto que deve ser preenchido e enviado de volta ao servidor. Quando temos que informar qualquer tipo de informação e enviar de volta (mesmo que seja apenas marcar uma opção de "ok"), estamos preenchendo um **formulário**.
+
+Este é justamente um caso em que termemos estabelecer uma conexão com o servidor. O Google exige o estabelecimento de uma **session** -- e isso é feito antes mesmo de capturar a página na qual o formulário está.
+
+Utilizamos a função _html\_session_ para isso:
 
 ```{r}
 google_url <- "https://www.google.com/"
@@ -27,13 +64,16 @@ google_url <- "https://www.google.com/"
 google_session <- html_session(google_url)
 ```
 
-Estabelecida a conexão, precisamos conhecer o formulário. Começamos, obviamente, obtendo o código HTML da página do formulário. Na sequência, vamos extrair do código da página os formulários. Como tabelas em HTML, fomrulários tem suas tags próprias e contamos no pacote _rvest_ com uma função que extrai uma lista contendo todos os formulários da página:
+Estabelecida a conexão, precisamos conhecer o formulário. Começamos, obviamente, obtendo o código HTML da página do formulário, tal como sempre fizemos. Mas desta vez, ao invés de passar a própria URL da página como argumento principal da função, passamos o objeto que contém as informações da session estabelecida:
 
 ```{r}
 google_pagina <- read_html(google_session)
+```
 
+Na sequência, vamos extrair do código da página os formulários. Como tabelas em HTML, fomrulários tem suas tags próprias e contamos no pacote _rvest_ com uma função que extrai uma lista contendo todos os formulários da página:
+
+```{r}
 google_form_list <- html_form(google_pagina)
-
 google_form_list
 ```
 
@@ -74,8 +114,8 @@ Legal! Agora vamos fazer a submissão do formulário. No buscador da Google, há
 
 ```{r}
 google_submission <- submit_form(session = google_session, 
-                                 form = google_form, 
-                                 submit = "btnG")
+                                 form    = google_form, 
+                                 submit   = "btnG")
 ```
 
 Pronto! Agora basta raspar o resultado como já haviámos feito antes. A página que queremos raspar é o objeto que resulta da função _submit\_form_. Abra o resultado de uma busca no Google e tente entender o código abaixo.
@@ -86,8 +126,16 @@ google_resultado <- read_html(google_submission)
 nodes_resultados <- html_nodes(google_resultado, xpath = "//h3/a")
 
 titulos <- html_text(nodes_resultados)
-links <- html_attr(nodes_resultados, name = "href")
-links <- paste0("https://www.google.com", links)
+links   <- html_attr(nodes_resultados, name = "href")
+links   <- paste0("https://www.google.com", links)
+```
+
+
+```{r}
+
+google_resultado %>% html_nodes(xpath = '//*[@id="nav"]/tbody/tr/td[12]')
+
+
 ```
 
 ## Obtendo informações sobre processos no STF
