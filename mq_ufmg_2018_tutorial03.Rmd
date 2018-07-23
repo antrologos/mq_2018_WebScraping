@@ -15,7 +15,7 @@ url_base <- "http://search.folha.uol.com.br/search?q=merenda&site=todos&results_
 
 ## Função Paste
 
-Como é possível reparar, o número da página fica ao final do link, por isso podemos utilizar a função chamada _paste0_ ou "colar" ao invés da função _gsub_.
+Como é possível reparar, o número da página fica ao final do link, por isso podemos utilizar a função chamada _paste_ ou "colar" ao invés da função _gsub_.
 
 Na linguagem do R, escreveremos assim para o nosso caso:
 
@@ -52,20 +52,31 @@ url_pesquisa <- paste(url_base, i, sep = "")
 A seguir, capturamos o código HTML da página:
 
 ```{r}
+library(rvest)
 pagina <- read_html(url_pesquisa)
 ```
 
 Escolhemos apenas os "nodes" que nos interessam:
 
 ```{r}
-nodes_titulos <- html_nodes(pagina, xpath = "//h3/a")
+nodes_titulos <- html_nodes(pagina, xpath = "//a/h2")
 ```
 
 Extraímos os títulos e os links com as funções apropriadas:
 
 ```{r}
 titulos <- html_text(nodes_titulos)
-links <- html_attr(nodes_titulos, name = "href")
+
+# Temos que voltar um passo atrás... lembra? (veja o Tutorial 2)
+
+        # podemos fazer isso:
+        nodes_links  <- html_nodes(nodes_titulos, xpath = "parent::*")
+
+        # Ou simplesmente isso:
+        nodes_links  <- html_nodes(nodes_titulos, xpath = "..")
+        
+# Então de fato extraímos os links
+links  <- html_attr(nodes_links, name = "href")
 ```
 
 Combinamos os dois vetores em um data frame:
@@ -80,6 +91,11 @@ Usaremos a função _bind\_rows_ (ou _rbind_ se estiver com problemas com o _dpl
 
 ```{r}
 library(dplyr)
+
+# Definimos um "banco de dados vazio", que sempre guardará o resultado acumulado:
+dados_pesquisa = data.frame()
+
+# Agora "empilhamos" nossos resultados
 dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 ```
 
@@ -91,28 +107,46 @@ library(rvest)
 
 url_base <- "http://search.folha.uol.com.br/search?q=merenda&site=todos&results_count=3769&search_time=0.033&url=http%3A%2F%2Fsearch.folha.uol.com.br%2Fsearch%3Fq%3Dmerenda%26site%3Dtodos&sr="
 
+# Definimos de antemão o objeto que guardará nossos resultados
+# Por ora, é um banco de dados vazio...
 dados_pesquisa <- data_frame()
 
-for (i in 1:151){
+for (i in 1:15){ # vamos coletar apenas as 15 primeiras páginas de resultados
   
+  # Mostramos na tela o número da página que estamos coletando
   print(i)
 
+  # Fazemos os calculos necessários para compor a URL correta 
   i <- (i - 1) * 25 + 1
   
+  # Colamos o contador na URL
   url_pesquisa <- paste(url_base, i, sep = "")
   
+  # Coletamos a página inteira
   pagina <- read_html(url_pesquisa)
   
-  nodes_titulos <- html_nodes(pagina, xpath = "//h3/a")
+  # Raspamos os títulos
+  nodes_titulos <- html_nodes(pagina, xpath = "//a/h2")
+  titulos       <- html_text(nodes_titulos)
   
-  titulos <- html_text(nodes_titulos)
-  links <- html_attr(nodes_titulos, name = "href")
+  # Raspamos os links
+  nodes_links <- html_nodes(nodes_titulos, xpath = "..")
+  links       <- html_attr(nodes_links, name = "href")
   
-  tabela_titulos <- data.frame(titulos, links)
+  # Combinamos titulos e links num banco de dados
+  tabela_titulos <- data_frame(titulos, links)
   
+  # Empilhamos nossos resultados
   dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 }
 
 ```
 
 Pronto! Temos agora todos os títulos e links de todos os resultados do site da Folha de São Paulo para a palavra "merenda" em um único banco de dados.
+
+Quer dar uma olhada?
+
+```{r}
+View(dados_pesquisa)
+```
+
