@@ -354,6 +354,6 @@ O resultado de ambas funções é um vetor com todos os títulos e links das not
 tabela_titulos <- data.frame(titulos, links)
 ```
 
-Use a função _View_ para visualizar os dados capturados.
+Use a função _View_ para visualizar os dados capturados. 
 
 O desafio a partir de agora é conectar o que aprendemos da raspagem de dados de várias páginas com "for loop", mas usando a função _html\_table_, com as novas funções de raspagem de páginas que extraem com precisão o que conteúdo que nos interessa. Esta será nossa próxima atividade.
