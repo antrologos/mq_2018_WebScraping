@@ -11,7 +11,7 @@ Para tornar nosso exemplo mais interessante, vamos utilizar discursos na Câmara
 
 A primeira ferramenta que veremos neste tutorial é o pacote _stringr_, que é parte do Vamos começar carregando os pacotes _rvest_ e _stringr_:
 
-```{r}
+```{r, echo = F}
 library(rvest)
 library(stringr)
 ```
@@ -19,16 +19,16 @@ library(stringr)
 A seguir, vamos salvar em um objeto a página que contém uma tabela com os links para os discursos. Note que quando fazemos pesquisa de discurso na Câmara dos Deputados obtemos apenas 20 discursos por página. Alterando o argumento "Pagesize" no url conseguimos obter todos (480) os links em uma página única.
 
 ```{r}
-url_tabela_discursos <- "http://www.camara.leg.br/internet/sitaqweb/DiscursosDeputado.asp?txOrador=LUIZA+ERUNDINA&Campoordenacao=dtSessao&tipoordenacao=DESC&Pagesize=1000&txUF=SP"
+url_tabela_discursos <- "http://www.camara.leg.br/internet/sitaqweb/resultadoPesquisaDiscursos.asp?txOrador=Luiza+Erundina&txPartido=PSOL&txUF=SP&dtInicio=&dtFim=&txTexto=&txSumario=&basePesq=plenario&CampoOrdenacao=dtSessao&PageSize=50&TipoOrdenacao=DESC&btnPesq=Pesquisar"
 ```
 
 Vamos capturar os links de cada discurso. Examine a url antes de prosseguir para aprender um pouco mais de webscrapping.
 
 ```{r}
 url_discursos <- url_tabela_discursos %>%
-  read_html() %>%
-  html_nodes(xpath = "//table[@class ='tabela-padrao-bootstrap table-bordered']//td/a") %>%
-  html_attr(name = "href")
+        read_html() %>%
+        html_nodes(xpath = "//a[contains(@title, 'do Discurso')]") %>%
+        html_attr(name = "href")
 ```
 
 O resultado é um vetor com o conteúdo dos atributos "href". Os url obtidos, entranto, têm problemas: falta o início do URL e há espaços onde não deveria haver. Precisamos adicionar o início da url para indicar que estamos navegando no servidor da Câmara e retirar os espaços vazios do url, que não são um problema para um browser como o Firefox, mas é um problema para o R.
@@ -37,19 +37,21 @@ Aproveitemos para ver duas funções novas, ambas do pacote _stringr_. Várias d
 
 _str\_c_ (aka string concatenar) é uma função semelhante a _paste0_ e serve para concatenar dois pedaços de texto, inclusive quando a operação for entre um texto e um vetor e entre vetores.
 
-_str\_replace\_all_, por sua vez, substitui no texto um padrão por outro, respectivamente na sequência de argumentos. Seu uso é semelhante à função _gsub_, mas os argumentos estão em ordem intuitiva. Por exemplo, estamos substituindo espaço por nada nos url:
+_str\_replace\_all_, por sua vez, substitui no texto um padrão por outro, respectivamente na sequência de argumentos. Seu uso é semelhante à função _gsub_, mas os argumentos estão em ordem intuitiva. Por exemplo, estamos substituindo espaço (incluindo tabs, quebras de linha etc) por nada nos url:
 
 ```{r}
 url_discursos <- str_c("http://www.camara.leg.br/internet/sitaqweb/", url_discursos)
-url_discursos <- str_replace_all(url_discursos, " ", "")
+url_discursos <- str_replace_all(url_discursos, "[[:space:]]", "") # procure saber mais sobre "expressões regulares"
 ```
 
 Vamos agora passar por todos os urls e obter os discursos. Examine a primeira url do vetor antes de prosseguir para aprender um pouco mais de webscrapping. Gravaremos os discursos em um objeto chamado "discursos", e cada posição conterá um discurso.
 
 ```{r}
 discursos <- c()
-for (url_discurso in url_discursos) {
-
+for (url_discurso in 1:length(url_discursos)) {
+  
+  print(i)
+        
   discurso <- url_discurso %>%
     read_html() %>%
     html_nodes(xpath = "//div[@id  = 'content']//p") %>%
@@ -57,7 +59,7 @@ for (url_discurso in url_discursos) {
   
   discursos <- c(discursos, discurso)
   
-  Sys.sleep(0.5)
+  Sys.sleep(0.3)
 }
 ```
 
@@ -118,7 +120,7 @@ str_sub(discursos, 1, 100)
 As posições para extração de exerto podem ser variáveis. Por exemplo, vamos usar "len_discursos" que criamos acima para extrair os 50 últimos caracteres de cada discurso:
 
 ```{r}
-str_sub(discursos, (len_discursos - 50), len_discursos)
+str_sub(discursos, (len_discursos - 50), len_discursos) # criamos o objeto 'len_discursos' mais acima, veja lá
 ```
 
 Note que alguns discursos começam e terminam com espaços. Para nos livrarmos deles (apenas daqueles no começo e fim da string), utilizamos _str\_trim_:
@@ -127,7 +129,7 @@ Note que alguns discursos começam e terminam com espaços. Para nos livrarmos d
 str_trim(discursos)
 ```
 
-Infelizmente, não há tempo suficiente para entrarmos neste tutorial em um tema extremamante útil: expressões regulares. Expressões regulares, como podemos deduzir pelo nome, são expressões que nos permite localizar -- e, portanto, substituir, extrair, parear, etc -- sequências de caracteres com determinadas caraterísticas -- por exemplo, "quaisquer caracteres entre parênteses", ou "qualquer sequência entre espaços que comece com 3 letras e termine com 4 números" (placa de automóvel).
+Infelizmente, não há tempo suficiente para entrarmos neste tutorial em um tema extremamante útil: expressões regulares (já mencionamos isso um pouco mais acima...). Expressões regulares, como podemos deduzir pelo nome, são expressões que nos permite localizar -- e, portanto, substituir, extrair, parear, etc -- sequências de caracteres com determinadas caraterísticas -- por exemplo, "quaisquer caracteres entre parênteses", ou "qualquer sequência entre espaços que comece com 3 letras e termine com 4 números" (tal com são as placas de automóvel).
 
 Você pode ler um pouco sobre expressões regulares no R [aqui](https://rstudio-pubs-static.s3.amazonaws.com/74603_76cd14d5983f47408fdf0b323550b846.html) se tiver tempo em sala de aula. Com o uso de expressões regulares, outros dois pares de funções são bastante úteis _str\_extract_, _str\_extract\_all_, _str\_match_ e _str\_match\_all_.
 
@@ -141,4 +143,3 @@ wordcloud(discursos, max.words = 50)
 ```
 
 Não muito bonita. Voltaremos a fazer nuvem de palavras depois de aprendermos outra maneiras de trabalharmos com texto como dado no R.
-

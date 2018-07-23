@@ -1,4 +1,4 @@
-# Tutorial 1
+# Tutorial 1 - Princípios básicos: rvest e coleta de tabelas
 _Autor_: Leonardo Sangali Barone
 
 _Revisão_: Rogério Jerônimo Barbosa

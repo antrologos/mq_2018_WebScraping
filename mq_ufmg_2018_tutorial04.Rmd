@@ -1,4 +1,4 @@
-# Tutorial 4
+# Tutorial 4 - Raspando notícias com XPath em 2 passos: links e conteúdos
 _Autor_: Leonardo Sangali Barone
 
 _Revisão_: Rogério Jerônimo Barbosa

@@ -1,4 +1,4 @@
-# Tutorial 3
+# Tutorial 3 - Raspando notícias com XPath (HTML) usando o rvest
 _Autor_: Leonardo Sangali Barone
 
 _Revisão_: Rogério Jerônimo Barbosa
