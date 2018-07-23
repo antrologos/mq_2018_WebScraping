@@ -47,7 +47,7 @@ Usando agora as funções _html\_nodes_ e _html\_text_, como vimos no tutorial a
 
 ```{r}
 node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
-titulo <- html_text(node_titulo)
+titulo      <- html_text(node_titulo)
 print(titulo)
 ```
 
@@ -55,7 +55,7 @@ Simples, não? Repita agora o mesmo procedimento para data e hora (tente sozinh@
 
 ```{r}
 node_datahora <- html_nodes(pagina, xpath = "//time")
-datahora <- html_text(node_datahora)
+datahora      <- html_text(node_datahora)
 print(datahora)
 ```
 
@@ -71,7 +71,7 @@ Finalmente, peguemos o texto. Note que o texto está dividido em vários parágr
 
 ```{r}
 node_texto <- html_nodes(pagina, xpath = "//article[@class = 'news']/p")
-texto <- html_text(node_texto)
+texto      <- html_text(node_texto)
 print(texto)
 ```
 
@@ -96,9 +96,9 @@ Por vezes, queremos fazer donwload de um arquivo cujo link encontramos na págin
 Em primeiro lugar, obtemos seu endereço URL, como acabamos de fazer com a notícia que capturamos na busca do DataFolha (tente ler o código e veja se o entende por completo):
 
 ```{r}
-library(rvest)
 url_noticia <- "http://datafolha.folha.uol.com.br/eleicoes/2017/06/1896223-lula-lidera-e-bolsonaro-disputa-com-marina-2-lugar-em-cenarios-para-2018.shtml"
-pagina <- read_html(url_noticia)
+
+pagina   <- read_html(url_noticia)
 node_pdf <- html_nodes(pagina, xpath = "//p[@class = 'stamp download']/a")
 link_pdf <- html_attr(node_pdf, name = "href")
 ```
@@ -181,13 +181,15 @@ Extraímos os títulos e os links com as funções apropriadas:
 
 ```{r}
 titulos <- html_text(nodes_titulos)
-links <- html_attr(nodes_titulos, name = "href")
+
+# Neste exemplo, diferentemente do que fizemos nos Tutoriais 2 e 3, não precisamos "voltar um passo" para coletar o atributo "href", que contém o link. Você consegue entender o por quê disso?
+links   <- html_attr(nodes_titulos, name = "href")
 ```
 
 Combinamos os dois vetores em um data frame:
 
 ```{r}
-tabela_titulos <- data.frame(titulos, links)
+tabela_titulos <- data_frame(titulos, links)
 ```
 
 Falta "empilhar" o que produziremos em cada iteração do loop de uma forma que facilite a visualização. Criamos um objeto vazio antes do loop. 
@@ -197,16 +199,13 @@ Usaremos a função _bind\_rows_ (ou _rbind_ se estiver com problemas com o _dpl
 ```{r}
 library(dplyr)
 
-dados_pesquisa <- data.frame()
+dados_pesquisa <- data_frame()
 dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 ```
 
 Chegou o momento de colocar dentro loop tudo o que queremos que execute em cada uma das vezes que ele ocorrer. Ou seja, que imprima na tela a página que está executando, que a URL da página de resultados seja construída com a função paste, para todas elas o código HTML seja examinado, lido no R e transformado em objeto XML, colete todos os links e todos os títulos e que "empilhe". Lembrando que não podemos esquecer de definir a URK que estamos usando e criar um data frame vazio para colocar todos os links e títulos coletados antes de iniciar o loop.
 
 ```{r}
-library(dplyr)
-library(rvest)
-
 url_base <- "http://search.folha.uol.com.br/search?q=elei%E7%F5es&site=datafolha%2Feleicoes&skin=datafolha&results_count=558&search_time=0.040&url=http%3A%2F%2Fsearch.folha.uol.com.br%2Fsearch%3Fq%3Delei%25E7%25F5es%26site%3Ddatafolha%252Feleicoes%26skin%3Ddatafolha&sr="
 
 dados_pesquisa <- data_frame()
@@ -224,10 +223,9 @@ for (i in 1:5){
   nodes_titulos <- html_nodes(pagina, xpath = "//h2/a")
   
   titulos <- html_text(nodes_titulos)
-  links <- html_attr(nodes_titulos, name = "href")
+  links   <- html_attr(nodes_titulos, name = "href")
   
-  tabela_titulos <- data.frame(titulos, links, 
-                               stringsAsFactors = F)
+  tabela_titulos <- data_frame(titulos, links)
   
   dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 }
@@ -248,14 +246,16 @@ url_noticia <- "http://datafolha.folha.uol.com.br/eleicoes/2017/06/1896223-lula-
 pagina <- read_html(url_noticia)
 
 node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
-titulo <- html_text(node_titulo)
+titulo      <- html_text(node_titulo)
 
 node_datahora <- html_nodes(pagina, xpath = "//time")
-datahora <- html_text(node_datahora)
+datahora      <- html_text(node_datahora)
 
 node_texto <- html_nodes(pagina, xpath = "//article[@class = 'news']/p")
-texto <- html_text(node_texto)
-texto <- paste(texto, collapse = " ")
+texto      <- html_text(node_texto)
+
+# Perceba que "texto" é um vetor de tipo character, composto de vários elementos. Queremos concatenar todos os seus elementos num só, para que ele seja um vetor de tamannho (length) igual a 1, tal como são "titulo" e "datahora".
+texto      <- paste(texto, collapse = " ")
 ```
 
 Para fazermos a captura de todos os links em "loop" deve ter o seguinte aspecto, como se vê no código abaixo que imprime todos os 558 links cujo conteúdo queremos capturar. Note que a forma de utilizar o loop é ligeiramente diferente da que havíamos visto até então. No lugar de uma variável "i" que "percorre" um vetor numérico (1:23, por exemplo), temos uma variável "link" que recebe, a cada iteração, um endereço URL da notícia, em ordem.
@@ -271,22 +271,19 @@ for (link in dados_pesquisa$links){
 Combinando os dois código, e criando um data frame "dados\_noticias" que é vazio antes do loop temos o código completo da captura. Tal como quando trabalhamos com tabelas, utilizando a função "bind_rows" para combinar o data frame que resultou da iteração anterior com a linha que combina o conteúdo armazenado em "titulo", "datahora" e "texto".
 
 ```{r, echo = F}
-dados_noticias <- data.frame()
+dados_noticias <- data_frame()
 
 for (link in dados_pesquisa$links){
   print(link)
   
-  # Algumas páginas podem ter links quebrados. Por esta razão, fazemos:
-  pagina <- try(expr = read_html(link), silent = T)  
-  if(any(class(pagina) %in% "try-error")){
-          next
-  }
+  # esse passo vai dar erro em algumas paginas... falaremos disso adiante
+  pagina <- read_html(link) 
   
   node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
-  titulo <- html_text(node_titulo)
+  titulo      <- html_text(node_titulo)
   
   node_datahora <- html_nodes(pagina, xpath = "//time")
-  datahora <- html_text(node_datahora)
+  datahora      <- html_text(node_datahora)
   
   node_texto <- html_nodes(pagina, xpath = "//article[@class = 'news']/p")
   texto <- html_text(node_texto)
@@ -311,6 +308,7 @@ library(rvest)
 
 url_base <- "http://search.folha.uol.com.br/search?q=elei%E7%F5es&site=datafolha%2Feleicoes&skin=datafolha&results_count=558&search_time=0.040&url=http%3A%2F%2Fsearch.folha.uol.com.br%2Fsearch%3Fq%3Delei%25E7%25F5es%26site%3Ddatafolha%252Feleicoes%26skin%3Ddatafolha&sr="
 
+# Banco que vai guardar títulos e links
 dados_pesquisa <- data_frame()
 
 for (i in 1:5){
@@ -321,32 +319,25 @@ for (i in 1:5){
   
   url_pesquisa <- paste(url_base, i, sep = "")
   
-  # Como no caso anterior, algumas páginas podem ter links quebrados...
-  pagina <- try(expr = read_html(link), silent = T)  
-  if(any(class(pagina) %in% "try-error")){
-          next
-  }
+  pagina <- read_html(url_pesquisa)
   
   nodes_titulos <- html_nodes(pagina, xpath = "//h2/a")
   
   titulos <- html_text(nodes_titulos)
-  links <- html_attr(nodes_titulos, name = "href")
+  links   <- html_attr(nodes_titulos, name = "href")
   
-  tabela_titulos <- data.frame(titulos, links)
+  tabela_titulos <- data_frame(titulos, links)
   
   dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 }
 
+# Banco que vai guardar o conteúdo das notícias
 dados_noticias <- data.frame()
 
 for (link in dados_pesquisa$links){
   print(link)
   
-  # Já viram isso antes, né? Então... páginas com links quebrados etc.
-  pagina <- try(expr = read_html(link), silent = T)  
-  if(any(class(pagina) %in% "try-error")){
-          next
-  }
+  pagina <- read_html(link)
   
   node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
   titulo <- html_text(node_titulo)
@@ -373,10 +364,18 @@ Vamos incluir uma cláusula de "tentativa" na captura da página com a função 
 
 ```{r}
 url_inexistente <- "http://datafolha.folha.uol.com.br/eleicoes/2018/10/42424242-leonardo-barone-e-eleito-senador-por-sao-paulo-com-record-de-votos.shtml"
+
+# Vejam:
+read_html(url_inexistente)
+```
+
+A cláusula de tentativa é introduzida pela função `try`:
+
+``` {r}
 pagina <- try(read_html(url_inexistente))
 ```
 
-Quando o URL não existe, o código não é interrompido e o objto página, que deveria ser da classe "xml_document", passa a ser da classe "try-error"
+Parece que nada mudou, né? Mas agora, quando o URL não existe, o código não é interrompido e o objto página, que deveria ser da classe "xml_document", passa a ser da classe "try-error"
 
 ```{r}
 class(pagina)
@@ -392,7 +391,22 @@ if (!(class(pagina) %in% "try-error")){
 }
 ```
 
-Pronto. Vamos adicionar esse pedaço de código (sem as mensagens) ao nosso programa completo e tentar novamente. Tente compreender como o código funciona. O resultado final, no momento da elaboração do tutorial, é de 550 notícias.
+O problema é que ao executarmos `try(read_html(url_inexistente))`, continuamos a receber o erro... e isso interrompe a execução... Gostaríamos que a tentativa de coletar o conteúdo da página fosse feita "em silêncio", isto é, sem a exibição da mensagem de erro, caso exista algum erro.
+
+Isso pode ser feito adicionando o argumento `silent = TRUE` na nossa função `try`:
+
+``` {r}
+pagina <- try(read_html(url_inexistente), silent = TRUE)
+```
+
+Agora vejam, a classe da página continua sendo "try-error", mas a execução não foi interrompida:
+
+``` {r}
+class(pagina)
+```
+
+
+Pronto! Vamos adicionar esse pedaço de código (sem as mensagens) ao nosso programa completo e tentar novamente. Tente compreender como o código funciona. O resultado final, no momento da elaboração do tutorial, é de 242 notícias (considerando a quantidade de links quebrados, tal como existentes no dia 23/07/2018 -- data da última revisão deste material).
 
 ```{r}
 library(dplyr)
@@ -402,7 +416,7 @@ url_base <- "http://search.folha.uol.com.br/search?q=elei%E7%F5es&site=datafolha
 
 dados_pesquisa <- data_frame()
 
-for (i in 1:23){
+for (i in 1:10){
   
   print(i)
   
@@ -417,20 +431,21 @@ for (i in 1:23){
   titulos <- html_text(nodes_titulos)
   links <- html_attr(nodes_titulos, name = "href")
   
-  tabela_titulos <- data.frame(titulos, links)
+  tabela_titulos <- data_frame(titulos, links)
   
   dados_pesquisa <- bind_rows(dados_pesquisa, tabela_titulos)
 }
 
-dados_noticias <- data.frame()
+dados_noticias <- data_frame()
 
 for (link in dados_pesquisa$links){
   
   print(link)
   
-  pagina <- try(read_html(link))
+  pagina <- try(read_html(link), silent = TRUE) # Aqui está nossa inserção
   
-  if (!(class(pagina) %in% "try-error")){
+  # Apenas vamos tentar raspar conteúdos das páginas que não deram erro:
+  if (!("try-error" %in% class(pagina))){
     node_titulo <- html_nodes(pagina, xpath = "//h1[@class = 'main_color main_title']")
     titulo <- html_text(node_titulo)
 
