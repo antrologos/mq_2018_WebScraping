@@ -64,7 +64,7 @@ Sem precisar observar muito, é fácil identificar que o código HTML da ALESP s
 
 Todas as informações em um documento XML estão dispostas em "tags" (id, nome, etc são as tags do nosso exemplo). Um documento XML é um conjunto de "tags" com hierarquia. Um conjunto de "tags" hierarquicamente organizado é chamado de "node". Por exemplo, no arquivo XML da Câmara dos Deputados apresentado acima, cada tag político contêm diversos outras "tags" e formam "nodes", ou seja, pedaços do arquivo XML.
 
-Em geral, as "tags" vÊm em pares: uma de abertura e outra de fechamento. O que as diferencia é a barra invertida presente na tag de fechamento. Entre as "tags" de abertura e fechamento vemos o conteúdo da tag, que pode, inclusive, ser outras "tags". Veja os exemplos abaixo:
+Em geral, as "tags" vêm em pares: uma de abertura e outra de fechamento. O que as diferencia é a barra presente na tag de fechamento. Entre as "tags" de abertura e fechamento vemos o conteúdo da tag, que pode, inclusive, ser outras "tags". Veja os exemplos abaixo:
 
 ```{xml}
 <minha_tag> Este é o conteúdo da tag </minha_tag>
@@ -80,7 +80,7 @@ Em geral, as "tags" vÊm em pares: uma de abertura e outra de fechamento. O que 
 </tag_pai>
 ```
 
-Identação (espaços) nos ajudam a ver a hierarquia entre as tags, mas não é obrigatória. Também as quebras de linha são opcionais.
+Identação (recuos/espaços colocados no início da linha) nos ajudam a ver a hierarquia entre as tags, mas não é obrigatória. Também as quebras de linha são opcionais.
 
 Além do conteúdo e do nome da tag, é extremamente comum encontrarmos "atributos" nas tags em bancos de dados e, sobretudo, em códigos HTML. Atributos ajudam a especificar a tag, ou seja, identificam qual é o seu uso ou carregam quaisquer outras informações referentes. Voltando ao exemplo fictício acima, poderíamos transformar a informação do cargo, que hoje é uma tag cargo dentro de outra tag cargo (horrível, não?) em atributo.
 
@@ -155,7 +155,7 @@ Veja que agora a tag "cargo" tem um atributo -- "tipo" -- cujos valores são "pr
 
 Tente, no próprio site da [Folha de São Paulo](http://www.folha.uol.com.br/), clicar com o botão direito em um hyperlink qualquer para observar algo semelhante ao exemplo acima. Adiante vamos ver como atributos são extremamente úteis ao nosso propósito.
 
-## Caminhos no XML e no HTML
+## Caminhos no XML e no HTML (XPath)
 
 O fato de haver hierarquia nos códigos XML e HTML nos permite construir "caminhos", como se fossem caminhos de pastas em um computador, dentro do código.
 
@@ -221,22 +221,22 @@ Nosso objetivo é construir um vetor com os links dos resultados. Em qualquer p�
 
 Entretanto, há diversos outros elementos "clicáveis" na página além dos links que nos interessam -- por exemplo, as barras laterais, o banner com os logotipos, os links do mapa do portal, etc. Precisamos, portanto, especificar bem o "caminho" para que obtivéssemos apenas os links que nos interessam.
 
-Infelizmente não temos tempo para aprender aprofundadamente HTML, mas podemos usar lógica e intuição para obter caminhos unívocos. Neste exemplo, todos as "tags" "a" que nos interessam são filhas de alguma tag "h3" (que, em html, define o tamanho dos caracteres do título), que por sua vez é filha de "li" (que é abreviação de "list" e indica um único elemento de uma lista). Podemos melhorar nosso caminho:
+Infelizmente não temos tempo para aprender aprofundadamente HTML, mas podemos usar lógica e intuição para obter caminhos unívocos. Neste exemplo, todos as "tags" "a" que nos interessam são filhas de alguma tag "h2" (que, em html, define o tamanho dos caracteres do título), que por sua vez é filha de "li" (que é abreviação de "list" e indica um único elemento de uma lista). Podemos melhorar nosso caminho:
 
 ```{html}
-//h3/a
+//h2/a
 ```
 
 ou, mais especificamente,
 
 ```{html}
-//li/h3/a
+//li/h2/a
 ```
 
 A tag li, por sua vez, é filha da tag "ol" ("ordered list"), ou seja, é a tag que dá início à lista não ordenada formada pelos elementos "li". Novamente, melhoramos nosso caminho:
 
 ```{html}
-//ol/li/h3/a
+//ol/li/h2/a
 ```
 
 E se houver mais de uma "ordered list" na página? Observe que essa tag "ul" tem atributos: class="search-results-title". Bem específico, não?
@@ -248,13 +248,13 @@ As tags mais comum em páginas HTML são: head, body, div, p, a, table, tbody, t
 Voltando ao nosso exemplo, se usarmos o atributo para especificar o "caminho" para os links teremos:
 
 ```{html}
-//ol[@class='search-results-title'/li/h3/a
+//ol[@class='search-results-title'/li/h2/a
 ```
 
 Poderíamos subir um nível hierárquico para melhorar o "caminho":
 
 ```{html}
-//div[@class='search-results']/ol[@class='search-results-title'/li/h3/a
+//div[@class='search-results']/ol[@class='search-results-title'/li/h2/a
 ```
 
 Pegou o espírito? Vamos agora dar o nome correto a este "caminho": xPath.
@@ -289,7 +289,7 @@ Voltando ao nosso exemplo da busca na Folha de São Paulo, vamos obter os títul
 Em primeiro lugar, com o caminho do título e a função _html\_nodes_, extraímos os "nodes" com as "tags" que nos interessam:
 
 ```{r}
-nodes_titulos <- html_nodes(pagina, xpath = "//h3/a")
+nodes_titulos <- html_nodes(pagina, xpath = "//a/h2/")
 ```
 
 Use a função "print" para observar o que capturamos.
@@ -301,13 +301,50 @@ titulos <- html_text(nodes_titulos)
 print(titulos)
 ```
 
-E a função _html\_attr_ para extrair os atributos "href", que contêm os títulos das notícias:
+Queremos então extrair os links que acompanham os títulos. Mas observem, no entanto, que a tag 'h2' que contém o título é uma filha (child) da tag 'a', que contém o atributo "href" (onde está o endereço do link).
+
+Veja que se tentarmos extrair "href" a partir dos nodes que raspamos, vamos produzir um erro: todos os valores serão NA (missing), afinal, na própria tag h2 não existe atributo "href".
+
 
 ```{r}
 links <- html_attr(nodes_titulos, name = "href")
+link
 ```
 
-Note que uma "tag" pode conter mais de um atributo e por isso usamos o argumento "name" da função _html\_attr_ para especificar qual atributo queremos.
+Se buscarmos simplesmente pela tag "a" e depois pelo atributo "href", também não iremos obter o que desejamos. O resultado vai ser todos os links contidos na página -- não apenas aqueles relativos aos títulos das matérias.
+
+```{r}
+todos_os_links <- html_nodes(pagina, xpath = "//a")
+todos_os_links <- html_attr(todos_os_links, name = "href")
+
+head(todos_os_links)
+
+```
+
+Nossa saída será a seguinte: 
+- Vamos navegar até a tag do título: //a/h2. 
+- Retrocederemos, então, um passo nessa estrutura hierárquica dos nodes
+
+Chegaremos novamente à tag 'a', certo? Por que fazer isso então, se no exemplo anterior era possível acessar tag desse tipo diretamente? A resposta é simpels: com isso, garantimos que não estamos falando de qualquer tag 'a', mas apenas aquelas que são "pais" (parent) de tags 'h2'. E aí sim, estando no lugar certo, rasparemos o atributo "href"!
+
+Mas como "retroceder" nas tags? Simples! A estrutura hierárquica é mesmo muito semelhante a uma estrutura de pastas ou diretórios do seu computador -- a lógica será a mesma. Se você já usou um terminal ou prompt de comando (aquela tela preta de linhas de comando, que lembra o antiquíssimo MS-DOS...), então sabe que para voltar um diretório, temos que usar 'cd ..'. Aqui, usando essa sintaxe de navegação em XML, chamada XPath, não é muito diferente:
+
+
+```{r}
+html_nodes(pagina, xpath = "//a/h2/..")
+```
+
+Viu? Usamos ".."! E agora temos apenas as tags 'a' que são pais das tags dos títulos de nossas notícias. Vamos agora coletar os links que tanto queremos:
+
+```{r}
+links <- html_nodes(pagina, xpath = "//a/h2/..")
+
+links <- html_attr(links, name = "href")
+
+print(links)
+```
+
+** Importante**: Saiba que uma "tag" pode conter mais de um atributo e por isso usamos o argumento "name" da função _html\_attr_ para especificar qual atributo queremos.
 
 Veja que as funções _html\_text_ e _html\_attr_ cumprem a mesma tarefa da função _html\_table_: retirar de um objeto XML (que é uma página capturada) as informações que nos interessam.
 
