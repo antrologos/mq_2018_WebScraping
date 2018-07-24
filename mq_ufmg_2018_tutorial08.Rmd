@@ -1,7 +1,5 @@
-# Tutorial 8 - Formulários na web
-_Autor_: Leonardo Sangali Barone
-
-_Revisão_: Rogério Jerônimo Barbosa
+# Tutorial 8 - Cookies, sessions e formulários na web. Navegue na internet com o R!
+_Autores_: Leonardo Sangali Barone e Rogério Jerônimo Barbosa
 
 Até agora trabalhamos com exemplos nos quais retiramos informação de páginas em html, mas não enviamos nenhuma informação ao servidor com as quais estamos nos comunicando (exceto manualmente). Contudo, é muito comum nos depararmos com formulários em páginas que queremos raspar. Formulários, na maioria das vezes, aparecerão como caixas de consulta acompanhada de um botão.
 
@@ -59,25 +57,37 @@ Este é justamente um caso em que termemos estabelecer uma conexão com o servid
 Utilizamos a função _html\_session_ para isso:
 
 ```{r}
-google_url <- "https://www.google.com/"
+google_url <- "https://www.google.com"
 
 google_session <- html_session(google_url)
 ```
 
-Estabelecida a conexão, precisamos conhecer o formulário. Começamos, obviamente, obtendo o código HTML da página do formulário, tal como sempre fizemos. Mas desta vez, ao invés de passar a própria URL da página como argumento principal da função, passamos o objeto que contém as informações da session estabelecida:
+Estabelecida a conexão, precisamos conhecer o formulário. Começamos, obviamente, obtendo o código HTML da página do formulário, tal como sempre fizemos. Mas desta vez, ao invés de passar a própria URL da página como argumento principal da função, passamos o objeto que contém as informações da session estabelecida.
+
+Veja: o objeto `google_session` guarda, além das informações sobre a conexão, também o próprio conteúdo HTML. 
 
 ```{r}
-google_pagina <- read_html(google_session)
+read_html(google_session)
 ```
 
-Na sequência, vamos extrair do código da página os formulários. Como tabelas em HTML, fomrulários tem suas tags próprias e contamos no pacote _rvest_ com uma função que extrai uma lista contendo todos os formulários da página:
+O objeto `google_session` pode ser alvo de nossas atividades de raspagem e coleta, sem que precisemos executar sobre ele novamente a extração do conteúdo HTML. Esse conteúdo já está lá!
+
+Se quiséssemos raspar todos os links da página, faríamos:
 
 ```{r}
-google_form_list <- html_form(google_pagina)
+html_nodes(google_session, xpath = "//a")
+```
+
+Nesse caso, nosso interesse é extrair formulário, isto é o trecho de HTML que contém o campo de busca onde digitamos o que queremos que o Google encontre para nós. Como tabelas em HTML, fomrulários tem suas tags próprias: `html <form>` e `html </form>`. E contamos, no pacote _rvest_, com uma função que extrai uma lista contendo todos os formulários da página:
+
+```{r}
+google_form_list <- html_form(google_session)
 google_form_list
 ```
 
-No caso do buscador da Google, há apenas um formulário na página. Com dois colchetes, extraímos o formulário que está na primeira posição da lista de formulários. Você verá que no caso do STF, obteremos mais de um formulário e precisaremos identificar qual queremos.
+O resultado da função `html_form` é uma lista (observe o `[[1]]` no topo dos resultados), tal como também ocorria no `html_table`.
+
+No caso do buscador da Google, há apenas um formulário na página. Com dois colchetes, extraímos então o item  que está na primeira posição da lista de formulários (você verá que no próximo exemplo, do site do STF, obteremos mais de um formulário e precisaremos identificar qual queremos).
 
 ```{r}
 google_form <- google_form_list[[1]]
@@ -91,7 +101,7 @@ Examine o objeto que contém o formulário. Ele é um objeto da classe "form" e 
 
 Vá para o navegador e inspecione a caixa de busca da Google e os botões de busca e "Estou com sorte". Você observará que cada "campo" do formulário é uma tag "input". O atributo "type", define se será oculto ("hidden"), texto ("text") ou botão de submissão ("submit"). Por sua vez, o atributo "name" dá nome ao campo.
 
-Alguns "inputs" já contêm valores (no atributo "values"). No nosso exemplo, os botões e campos ocultos. Estes últimos jáidentificaram o idioma ("hl") e o enconding ("ie") com o qual trabalhamos.
+Alguns "inputs" já contêm valores (no atributo "values"). No nosso exemplo, os botões e campos ocultos. Estes últimos jáidentificaram o idioma ("hl") e o enconding ("ie") com o qual trabalhamos. Ou seja, o **Google já deixou preenchidas partes do formulário**!!. É por esta razão que recebemos resultados preferencialmente em português e relacionados a sites brasileiros!
 
 O que nos interesse preencher, obviamente, é o "input" chamado "q". Em várias ferramentas de busca, "q" (acronismo para "query") é a caixa de texto onde fazemos a busca.
 
@@ -110,33 +120,188 @@ Reexamine agora o formulário. Você verá que "q" está preenchido:
 google_form
 ```
 
-Legal! Agora vamos fazer a submissão do formulário. No buscador da Google, há duas possibilidades de submissão. Vamos usar "Pesquisa Google" e não "Estou com sorte". Na _submit\_form_, precismos informar a sessão que criamos (conexão com o servidor), o formulário que vamos submeter e o nome do botão de submissão. Veja o exemplo: 
+Legal! Agora vamos fazer a submissão do formulário. No buscador da Google, há duas possibilidades de submissão. Vamos usar "Pesquisa Google" e não "Estou com sorte". Na _submit\_form_, precismos informar a sessão que criamos (conexão com o servidor), o formulário que vamos submeter e o nome do botão de submissão.
+
+Foi por isso, desde o início, que criamos a session! O argumento principal da função do `rvest` que faz a submissão do formulário requer necessariamente que você informe a session. 
+
+Veja o exemplo: 
 
 ```{r}
-google_submission <- submit_form(session = google_session, 
-                                 form    = google_form, 
+google_submission <- submit_form(session  = google_session, 
+                                 form     = google_form, 
                                  submit   = "btnG")
 ```
 
-Pronto! Agora basta raspar o resultado como já haviámos feito antes. A página que queremos raspar é o objeto que resulta da função _submit\_form_. Abra o resultado de uma busca no Google e tente entender o código abaixo.
+Pronto! Fizemos a submissão do formulário. Notou o argumento `submit = "btnG"`? Ele é justamente o valor que estava no atributo `<input submit>` do formulário. Já falamos dele. Dê uma checada. Ele é como se fosse o nosso botão de "OK", que envia a busca. Temos que informar isso! E note que há duas possibilidades de submissão nesse formulário: a "Pesquisa Google", que é a busca tradicional, e a "Estou com Sorte". Essas duas opções também existem no seu navegador.
+
+Como output da submissão, recebemos um resultado, salvo agora no objeto `google_submission`. Mas que objeto é esse? Nos termos da linguagem R, de que classe ele é?
+
+Ora! Vejamos:
 
 ```{r}
-google_resultado <- read_html(google_submission)
+class(google_submission)
+```
 
-nodes_resultados <- html_nodes(google_resultado, xpath = "//h3/a")
+Ele é uma session! Tal como também era nosso objeto `google_session`. Isso significa que então nossa relação duradoura com o Google está mantida, nossa conexão está estabelecida. O Google, por meio de cookies e outras informações, têm então memória dos passos anteriores que percorremos até aqui. Sabe que estivemos numa página anterior e que submetemos um termo de busca. 
+
+Tudo se passa como se tivessemos digitado algo para pesquisar no google (no caso, "merenda"), e então clicado no botão "Pesquisa Google" ou apertado a tecla Enter. O resultado dessa ação vai ser a navegação até outra página, onde agora estão exibidos os resultados da pesquisa. Você já não está mais na mesma página. **Você navegou com o R**!! E a página que obtivemos está guardada no objeto que resulta da função _submit\_form_, juntamente com as informações sobre sua conexão (afinal, trata-se de uma session).
+
+Veja:
+
+```{r}
+read_html(google_submission)
+```
+
+Agora basta raspar o resultado como já haviámos feito antes. Como você já sabe, podemos aplicar nossas operações diretamente no objeto que resulta da session, sem a necessidade de utilizar a função `read_html`.
+
+Faça no seu navegados (fora do R) a mesma busca utilizando  o Google. Examine a página, inspecione o código fonte. E então, tente entender o código abaixo:
+
+```{r}
+nodes_resultados <- html_nodes(google_submission, xpath = "//h3/a")
 
 titulos <- html_text(nodes_resultados)
 links   <- html_attr(nodes_resultados, name = "href")
 links   <- paste0("https://www.google.com", links)
 ```
+        
+Os títulos dos resultados de busca estão em tags do tipo h3. E as tags 'a' são "filhas" (child) das tags dos títulos. Já vimos isso antes várias vezes. Então você já sabe o que fazer. Certo? (se ainda tiver dúvidas, volte aos quatro primeiros tutoriais).
 
+Certo... Mas como você deve saber por sua experiência prática com o buscador, os resultados de uma busca no Google não são exibidos numa única página. Há várias páginas de resultado. Temos que clicar em "Mais" (veja no seu navegador). 
+
+Inspecione a estrutura esse link, clicando com o botão direito sobre ele e selecionando a opção "Inspecionar" (ou equivalente) em seu navegador. Você vai notar que a tag 'a' desse link traz um atributo "class" com valor igual a "pn". Então este é, aparentemente, o link em que queremos clicar para ir para as próximas páginas, certo?
+
+Vejamos se esse link existe no nosso objeto do R:
 
 ```{r}
+html_nodes(google_submission, xpath = "//a[@class='pn']")
+```
 
-google_resultado %>% html_nodes(xpath = '//*[@id="nav"]/tbody/tr/td[12]')
+Vixe... não existe! Mas como isso é possível!?
 
+Ocorre que a página que está guardada dentro do nosso objeto `google_submission` não é exatamente idêntica àquela que está no seu navegador. A session aberta entre o Google e o R não é a mesma session entre o Google e seu navegador. Você provavelmente já utilizou o Google várias vezes no seu navegador -- e, em algum lugar do seu computador, há cookies e outros arquivos que registraram parte das interações e opções que você selecionou no passado. E a estrutura HTML gerada pelos resultados da busca no Google varia de acordo com isso.
+
+Mas então como saber onde está o nosso link "Mais", no qual poderíamos clicar para ir para as próximas páginas de resultados?
+
+Uma forma simples de saber é a seguinte. 
+
+1. Extraia o conteúdo HTML da página de resultados com a função `read_html`. 
+2. Usando a função `as.character`, transforme esse objeto (que pertence  simultâneamente às classes xml_document e xml_node) num vetor de tipo character
+3. Usando a função `writeLines`, salve o conteúdo desse vetor num arquivo de texto com a extensão .html. 
+4. Abra esse arquivo salvo por você no navegador e inspecione o link "Mais"
+
+Com isso, garantimos que a página inspecionada é mesmo aquela que foi coletada pelo R, usando de nossa session:
+
+```{r}
+pagina <- read_html(google_submission)
+pagina <- as.character(pagina)
+writeLines(pagina, "/users/rogerio/desktop/pagina.html")
 
 ```
+
+Inspecionou? Encontrou a tag 'a' que contém o link "Mais"? O atributo "class" dessa tag tem valor igual a "fl" e não "pn", como tínhamos visto antes.
+
+O problema, vejam, é que há muitas tags 'a' com `html @class="fl"`:
+
+```{r}
+html_nodes(google_submission, xpath = '//a[@class="fl"]')
+```
+
+Qual delas queremos? É melhor dar uma inspecionada novamente e sermos mais específicos.
+
+Veja agora abaixo. Que tal isso?
+
+```{r}
+html_nodes(google_submission, xpath = '//td[@class="b"]/a[@class="fl"]')
+```
+
+Parece que deu certo. Temos apenas um resultado. Mas como saber, como ter certeza? É só verificar se de fato o conteúdo da tag é a palavra "Mais":
+
+```{r}
+link = html_nodes(google_submission, xpath = '//td[@class="b"]/a[@class="fl"]')
+html_text(link)
+```
+
+Viva! Encontramos o link para ir para a próxima página. Haveria, contudo, várias formas de obter esse mesmo link -- usando tanto XPath como CSS. Você consegue compreeender a linha abaixo, que gera o mesmo resultado?
+
+```{r}
+html_nodes(google_submission, xpath = "//span[text()='Mais']/..")
+```
+
+Agora temos é que clicar no link e segui-lo, para chegar até a próxima página de resultados. Fazemos isso com a função `follow_link()`:
+
+```{r}
+google_submission_page2 <- follow_link(google_submission, xpath = "//span[text()='Mais']/..")
+```
+
+Como você pode imaginar, a classe desse objeto é, novamente, uma session:
+
+```{r}
+class(google_submission_page2)
+```
+
+Se é uma session, continuamos conectados. Mas agora, estamos na página 2. Então podemos coletar os novos resultados:
+
+```{r}
+nodes_resultados2 <- html_nodes(google_submission_page2, xpath = "//h3/a")
+
+titulos2 <- html_text(nodes_resultados2)
+links2   <- html_attr(nodes_resultados2, name = "href")
+links2   <- paste0("https://www.google.com", links)
+```
+
+**Você está literalmente navegando na internet com o R**, clicando em links e até mesmo fazendo pesquisa no Google! Lindo, não?
+
+Que tal fazer um loop para coletar as primeiras 10 páginas de resultado então?
+
+```{r}
+google_url <- "https://www.google.com"
+
+# Estabelecendo a conexão e coletando a primeira página
+google_session <- html_session(google_url)
+
+# Raspando o formulário, retirando-o da lista e preenchendo o campo de busca 
+google_form <- html_form(google_session)[[1]]
+google_form <- set_values(google_form, 
+                          'q' = "merenda")
+
+# Submetendo os resultados (usando o botão da "Pesquisa Google", o "btnG")
+google_session <- submit_form(session = google_session, 
+                              form    = google_form,
+                              submit  = "btnG")
+
+data_resultados <- data_frame()
+for(i in 1:10){
+        
+        print(i)
+        
+        # Coletando os nodes dos resultados
+        nodes_resultados <- html_nodes(google_session, xpath = "//h3/a")
+        
+        # Raspando títulos e links
+        titulos <- html_text(nodes_resultados)
+        links   <- html_attr(nodes_resultados, name = "href") %>% 
+                paste0("https://www.google.com", .)
+        
+        # Compilando os resultados num data frame
+        data_resultados <- bind_rows(data_resultados,
+                                     data_frame(titulos, links))
+        
+        # Navegando até a próxima página
+        google_session <- follow_link(google_session, xpath = '//span[text()="Mais"]/..')
+        
+        # Um tempinho para o navegador respirar, carregar a página (e o Google não nos 
+        # bloquear por excesso de requições)
+        Sys.sleep(.5)
+
+}
+```
+
+Vejamos agora os nossos links coletados das 10 primeiras páginas de resultados do Google:
+
+```{r}
+data_resultados
+```
+
 
 ## Obtendo informações sobre processos no STF
 
@@ -151,11 +316,9 @@ Vamos proceder como fizemos no caso do buscador da Google. Começaremos estabele
 ```{r}
 stf_url <- "http://www.stf.jus.br/portal/processo/pesquisarProcesso.asp"
 
-stf_session <- html_session(stf_url)
+stf_session   <- html_session(stf_url)
 
-stf_pagina <- read_html(stf_session)
-
-stf_form_list <- html_form(stf_pagina)
+stf_form_list <- html_form(stf_session)
 
 stf_form_list
 ```
@@ -169,9 +332,16 @@ Neste caso, queremos fazer a busca por número de processo e o campo de busca se
 
   stf_form
 ```
+
 Escolhido o formulário, precisamos preenchê-lo. Aqui nos depararemos com um novo problema: como saber qual campo é de preenchimento obrigatório? Esta informação pode esta até visível na página, e esta será nossa primeira pista. No caso do STF, não está. "dropmsgoption", por exemplo, é um campo obrigatório que ainda não está preenchido no formulário que capturamos. Tentativa e erro é o recurso final e tente se colocar no lugar de quem criou o formulário para preenchê-lo.
 
-Note que o campo "dropmsgoption" é uma tag "select" e não "input". As tags "select" vêm acompanhadas, em geral, de suas opções, que relacionam o texto da opção com seu código. No nosso caso, queremos o código "1!
+Note que o campo "dropmsgoption" é uma tag "select" e não "input". As tags "select" vêm acompanhadas, em geral, de suas opções, que relacionam o texto da opção com seu código. Vejam:
+
+```{r}
+stf_form$fields$dropmsgoption
+```
+
+No nosso caso, queremos o código "1"!
 
 Vamos, então, preencher os dois parâmetos do formulário. Por uma razão que não convém explicar, vamos omitir na nossa busca o nome do processo (ex: ADI, AC, Pet, etc). Buscaremos apenas o número.
 
@@ -188,19 +358,18 @@ Note agora que o botão de preenchimento do formulário não tem nome. Não tem 
 stf_submission <- submit_form(session = stf_session, 
                                  form = stf_form)
 ```
+
 Faça o mesmo processo manualmente. O resultado é uma tabela com os links para todos os diferentes tipos de processos com o número buscado. Podemos extrair a tabela (você já sabe fazer isso):
 
 ```{r}
-stf_resultado <- read_html(stf_submission)
-
-tabela_processos <- html_table(stf_resultado)[[1]]
+tabela_processos <- html_table(stf_submission)[[1]]
 ```
 
 E os links dos processos (você também sabe fazer isso). Os links precisarão de um pouco de limpeza e utilizaremos a função _str\_sub_ do pacote _stringr_ para resolver este problema:
 
 ```{r}
-nodes_links_processos <- html_nodes(stf_resultado, xpath = "//table//a")
-links_processos <- html_attr(nodes_links_processos, name = "href")
+nodes_links_processos <- html_nodes(stf_submission, xpath = "//table//a")
+links_processos       <- html_attr(nodes_links_processos, name = "href")
 
 library(stringr)
 links_processos <- str_sub(links_processos, 8, str_length(links_processos))
@@ -215,17 +384,15 @@ tabela_processos$links <- links_processos
 
 Excelente! Podemos escolher o  link de um processo usando a tabela (ADI, por exemplo):
 
-OBS: Na rede da UFMG este pedaço do código pode não funcionar por questões que extrapolam o escopo do tutorial. Comentarem em aula.
-
 ```{r}
 link_adi <- tabela_processos$links[str_detect(tabela_processos$Processo, "ADI")]
 ```
 E capturar a tabela com as infomações do processo.
 
 ```{r}
-pagina_adi <- read_html(link_adi)
+pagina_adi       <- read_html(link_adi)
 lista_tabela_adi <- html_table(pagina_adi, fill = T)
-tabela_adi <- lista_tabela_adi[[2]]
+tabela_adi       <- lista_tabela_adi[[2]]
 ```
 
 ## Desafio
