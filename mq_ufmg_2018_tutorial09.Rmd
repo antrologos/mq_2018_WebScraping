@@ -21,7 +21,7 @@ Volte para a página inicial do seu Twitter Apps. Escolha seu novo App. Clique n
 
 Algumas das funções que vamos utilizar nesta atividade não estão na biblioteca básica do R. Temos, dessa forma, que começar instalando uma biblioteca chamada _twitteR_. Esta biblioteca depende de outras duas, chamadas _ROAuth_ (para autenticar conexões na web) e _httr_ (para fazer requisições http, "http requests"). Vamos, assim, instalar as 3 bibliotecas:
 
-```{r}
+```{r, eval = FALSE}
 install.packages("ROAuth")
 install.packages("httr")
 install.packages("twitteR")
@@ -40,19 +40,19 @@ library(twitteR)
 Para conectar-se ao Twitter via R, utilizaremos a função _setup\_twitter\_oauth_. Esta função recebe como parâmetros as "chaves" que você encontrará na página do App que você criou, "Consumer Key (API Key)", "Consumer Secret (API Secret)", "Access Token" e "Access Token Secret". É conveniente armazenar ambas em objetos de texto, como abaixo:
 
 ```{r}
-consumer_key <- "Dei4fs0CoWVj4xHwmEg6vCaKK"
-consumer_secret <- "4enUvutc6X59lptYMjxYl8zJuSb35phrrKcqQGnQA3q5O2x6fF"
-access_token <- "47187333-8JRk8bDwWzfk1wlkCF5ZLf5QNa04M3EHN2o5M2rp6"
-access_secret <- "vCsLaFZMOQLv3EHJPh0MrNXJD0rJOHI11EELgWbKWN2TZ"
+consumer_key    <- "XXXXXXXXXXXXXXXX"
+consumer_secret <- "XXXXXXXXXXXXXXXX"
+access_token    <- "XXXXXXXXXXXXXXXX"
+access_secret   <- "XXXXXXXXXXXXXXXX"
 ```
 
 Usamos agora a função "setup_twitter_oauth" e nos conectamos ao Twitter via R:
 
 ```{r}
-setup_twitter_oauth(consumer_key,
-                    consumer_secret,
-                    access_token,
-                    access_secret)
+setup_twitter_oauth(consumer_key    = consumer_key,
+                    consumer_secret = consumer_secret,
+                    access_token    = access_token,
+                    access_secret   = access_secret)
 ```
 
 Escolher a opção (1). Você será redirecionad@ ao browser para concluir a autenticação.
@@ -170,6 +170,6 @@ avail_trends[avail_trends$country == "Brazil",]
 Com o código "woeid", obtemos os trends:
 
 ```{r}
-trends <- getTrends(23424768)
+trends <- getTrends(455821)
 head(trends)
 ```
