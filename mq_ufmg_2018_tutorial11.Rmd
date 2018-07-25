@@ -1,15 +1,21 @@
-# Tutorial 11 - Pacote Rfacebook
-_Autor_: Leonardo Sangali Barone
+# Tutorial 11 - Pacote Rfacebook (desde 2018, requer avaliação e autorização do Facebook - Políticas de Privacidade)
 
-_Revisão_: Rogério Jerônimo Barbosa
+_Autores_: Leonardo Sangali Barone e Rogério Jerônimo Barbosa
 
-Neste breve tutorial vamos ver como acessar a API do facebook com R e obter dados informações sobre um conjunto limitado de postagens.
 
-Diferentemente do twitter, o facebook restringe os dados que podem ser acessados via API. Os únicos dados que conseguimos capturar com o pacote _Rfacebook_ e que os interessam para fins de pesquisa são as postagens de páginas públicas e grupos aos quais pertencemos.
+## Introdução
+
+Neste breve tutorial vamos ver como acessar a API do facebook com R e obter dados informações bastante limitadas do Facebook. Após uma série de embrólios judiciais, o Facebook limitou substancialmente a natureza dos dados que podem ser coletados via API. Deste modo, não teremos acesso a muita coisa, por esta via gratuita e/ou não licenciada.
+
+Os únicos dados que conseguimos capturar com o pacote _Rfacebook_ agora, são informações muito limitadas sobre nosso próprio perfil na rede social. Sequer conseguimos coletar dados de nossas postagens, páginas ou grupos... Isso é chato para quem quer coletar dados. Mas pense pelo lado positivo: como usuários, é ótimo saber que uma política mais séria de privacidade e proteção foi implementada. 
+
+Existe sim a possibilidade de coletar dados do Facebook com API, tal como fizemos no Twitter. Mas, para isso, é necessário registrar o aplicativo conforme os requisitos de segurança e privacidade da empresa Facebook. Por meio de um formulário no site do próprio Facebook, você deverá informar quais os tipos de informação deseja coletar (dados dos perfis, posts, eventos, links etc.), dizer qual a finalidade do uso, apresentar um documento próprio que informa sobre as políticas de privacidade do seu aplicativo que raspará dos dados, dentre outras coisas. Ficou bem mais burocrático. E você pode, ao final, ter sua autorização negada! 
+
+Deste modo, não é mais possível fazer scraping do Facebook tal como se fazia antes... Mas, como dissemos, há um lado bom nisso!
+
+## Construindo uma interface para acessar o API do Facebook a partir do R
 
 Há um bom tutorial sobre no [repositório do pacote _Rfacebook_](https://github.com/pablobarbera/Rfacebook). Sugiro sua leitura.
-
-## O pacote _Rfacebook_
 
 Vamos começar instalando o pacote:
 
@@ -46,34 +52,52 @@ app_secret <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 **Pronto! Seu aplicativo foi criado. Agora você tem uma porta de acesso (uma espécie de 'login') para entrar no Facebook via R. Você não precisa mais executar os passos de 1 a 5 novamente. Da próxima vez, comece a partir daqui**.
 
-* 6 - Agora execute: 
+Algo muitíssimo importante a ser dito agora é o seguinte: o pacote Rfacebook não é atualizado há algum tempo... Na data de fechamento deste tutorial (25/07/2018), observamos que a última atualização havia ocorrido em 25 de maio de 2017; ou seja, há mais de um ano. 
+
+Isso não seria um problema. Há vários pacotes antigos ou sem atualização que funcionam muito bem. E vocês podem observar que o pacote Rfacebook [ainda continua no CRAN](https://cran.r-project.org/web/packages/Rfacebook/index.html), o que indica que ele ainda satisfaz todos os requisitos técnicos: documentação completa, nenhum conflito com outros pacotes existentes, apenas lança mão de funções auxiliares que funcionam etc... 
+
+Ocorre, no entanto, como vocês devem estar sabendo, que diversas políticas de privacidade na internet foram alteradas recentemente. Em especial, o Facebook foi alvo de processos em diversos lugares (em especial nos EUA, onde o seu fundador, Mark Zuckerberg chegou até a ter que comparecer diante do Congresso!). Além disso a União Européia implementou uma série de restrições de acesso a dados de cidadãos europeus; algo que impactou seriamente a forma pela qual dados são disponibilizados e usados. Agora, inclusive, sites devem avisar se vão lançar mão de cookies ou não! (sobre cookies, veja o Tutorial 8).
+
+Deste modo, **não conseguimos mais utilizar a função do pacote Rfacebook** para nos conectarmos ao API. Contudo, há poucos dias, no blog do [Curso R](http://curso-r.com/blog/2018/07/23/2018-07-22-rfacebook/), Bruna Wundervald e Julio Trecenti publicaram uma solução para esse problema e fizeram uma correção na função de conexão. Vamos fazer uso dessa função corrigida, que já está disponível numa subpasta da página do nosso curso no GitHub.
+
+* 7 - Para baixar e implementar a função corrigida, execute o seguinte: 
 
 ```{r}
-fb_oauth <- fbOAuth(app_id     = app_id, 
-                    app_secret = app_secret, 
-                    extended_permissions = TRUE)
+source("https://raw.githubusercontent.com/antrologos/mq_2018_WebScraping/master/Fun%C3%A7%C3%B5es/new_fbOAuth_BRUNA_WUNDERVALD.R")
 ```
 
-* 7 - No console do R, você receberá a seguinte mensagem: "Copy and paste into Site URL on Facebook App Settings: http://localhost:1410/. When done, press any key to continue...". Se você seguiu o Passo 4 (acima), está tudo certo. Aperte qualquer tecla do seu computador, tal como o R está pedindo. Uma janela do seu navegador vai então se abrir --  pedindo para você autorizar que seu aplicativo acesse seus dados do Facebook. Autorize! (Afinal, é você mesmo que vai acessar esses dados. Não se preocupe!).
+A função antiga se chamava `fbOAuth`. A nova função vai se chamar `new_fbOAuth`. Mas a execução é exatamente a mesma; com todos os parâmetros iguais.
 
-É interessante salvar o objeto de autenticação em uma pasta do seu computador. Você poderá reutilizá-lo sempre que quiser para evitar fazer todas as vezes o processo de autenticação:
+* 8 - Então, para se conectar ao API, faça o seguinte:
+
+```{r}
+fb_oauth <- new_fbOAuth(app_id     = app_id, 
+                        app_secret = app_secret, 
+                        extended_permissions = TRUE)
+```
+
+* 9 - É possível que no console do R, você receba a seguinte mensagem: "Copy and paste into Site URL on Facebook App Settings: http://localhost:1410/. When done, press any key to continue...". Se você seguiu o Passo 4 (acima), está tudo certo. Aperte qualquer tecla do seu computador, tal como o R está pedindo. Uma janela do seu navegador vai então se abrir --  pedindo para você autorizar que seu aplicativo acesse seus dados do Facebook. Autorize! (Afinal, é você mesmo que vai acessar esses dados. Não se preocupe!).
+
+Se tudo deu certo, você vai receber as seguintes mensagens no console: "Authentication complete" e "Authentication successful." Ufa!!! Não se frustrem se não der certo a primeira vez. Os passos são realmente chatos e muito cheios de detalhes. Recomecem o processo e leiam o tutorial indicado.
+
+Para evitar a repetição de tudo, é interessante salvar o objeto de autenticação em uma pasta do seu computador. Você poderá reutilizá-lo sempre que quiser:
 
 ```{r}
 save(fb_oauth, file="/users/rogerio/Google Drive/fb_oauth")
 load("/users/rogerio/Google Drive/fb_oauth")
 ```
 
-**Se você salvar esse objeto contendo as informações de acesso, você pode saltar todos os passos anteriores, começando direto de load()!**
+**Com esse objeto contendo as informações de acesso, você pode saltar todos os passos anteriores, começando direto de load()!** 
 
 Alternativamente à autenticação com Id e chave secreta, podemos utilizar o token de acesso para acessar a API. Trata-se de uma espécie de passaporte de acesso temporário, que dura por duas horas apenas. Depois disso é preciso renová-lo. Essa é uma forma controlada de garantir acesso ao aplicativo.
 
-Para gerar um token, clique [aqui](https://developers.facebook.com/tools/explorer). Na página à qual você será redirecionad@, você poderá gerar um "Token de acesso". No botão "Obter Token" e selecione a opção "Obter token do aplicativo". Um número será gerado. É só copiá-lo aqui:
+Para gerar um token, clique [aqui](https://developers.facebook.com/tools/explorer). Na página à qual você será redirecionad@, copie o número do "Token de acesso". Depois, é só colá-lo aqui:
 
 ```{r}
 token_acesso <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 ```
 
-Durante a aula, deixaremos um token válido para vocês. Não se frustrem se não der certo a primeira vez. Os passos são realmente chatos e muito cheios de detalhes. Recomecem o processo e leiam o tutorial indicado.
+Durante a aula, deixaremos um token válido para vocês. 
 
 ## Obtendo dados com Rfacebook
 
@@ -82,16 +106,28 @@ Vamos ver basicamente 3 funções do pacote _Rfacebook_:
 - `getPage` : retorna os dados sobre uma página pública 
 - `getGroup` : retorna os dados sobre um grupo ao qual você pertence
 
-Para coletar os dados sobre você então, faça o seguinte:
+Essas foram as funções que se tornaram limitadas, após a alteração das políticas de privacidade. Hoje em dia, sem o devido registro do aplicativo que você criou naquela interface de desenvolvimento do Facebook, praticamente não há muita coisa para fazer... 
+
+Para coletar os pouquíssimo dados disponíveis  sobre você mesmo então, faça o seguinte:
 
 ```{r}
+# Se você estiver usando a conexão autorizada e permanente com o API,
+# informe no parâmetro 'token' o objeto que guarda os dados da conexão:
+me <- getUsers("me", token = fb_oauth)
+View(me)
+
+# Se você estiver usando um token teporário, informe o número do token, que criamos
+# mais acima:
 me <- getUsers("me", token = token_acesso)
-View(page)
+View(me)
+
 ```
 
-Desinteressante. Vamos agora testar com uma página. Escolhi como exemplo a página ["I Fucking Love Science"](https://www.facebook.com/IFeakingLoveScience/). Note no URL da página que o "nome do usuário" da página (sic) é "IFeakingLoveScience".
+Desinteressante, né? Não há muitas informações... Apenas o seu nome e ID único dentro da rede social. Anteriormente, várias daquelas outras informações apresentadas no cabeçalho do banco de dados (o nome das variáveis) estavam disponíveis.
 
-Vamos inserir três argumentos na função _getPage_: o "nome do usuário" da página; o token de acesso, que pode ser tanto os objetos "fb_oauth" ou "token_acesso", que criamos acima; e o número de postagem que desejamos:
+Vamos ver agora o que acontece quanto tentamos coletar dados de uma página. Escolhemos como exemplo a página ["I Fucking Love Science"](https://www.facebook.com/IFeakingLoveScience/). Note no URL da página que o "nome do usuário" da página (sic) é "IFeakingLoveScience". Esse nome está no próprio link. Examine-o.
+
+Vamos inserir três argumentos na função _getPage_: o "nome" da página; o token de acesso, que pode ser tanto os objetos "fb_oauth" ou "token_acesso", que criamos acima; e o número de postagens que desejamos:
 
 ```{r}
 page <- getPage(page = "IFeakingLoveScience", 
@@ -100,9 +136,11 @@ page <- getPage(page = "IFeakingLoveScience",
 View(page)
 ```
 
-O resultado da função é um data frame com as últimas 100 postagens da página. Dentre as variáveis mais interessantes estão o texto do post, usuário que postou, data, url para o post (hey, podemos tentar usar isso aqui de outra forma!), o número de reações, shares e comentários.
+O resultado desta função seria um **data frame** com as últimas 100 postagens da página. Dentre as variáveis mais interessantes, estariam disponíveis o texto do post, usuário que postou, a data, o link para o post  (url), o número de reações, shares e comentários.
 
-Há alguns outros argumntos importantes na função. Em vez do númeo de postagens, você pode utilizar os argumentos "since" e "until" para delimitar um intervalo de tempo para obter postagens. Por exemplo:
+** Hoje em dia, no entanto, o resultado dessa função é um aviso de erro, que informa que você _deve registrar seu aplicativo frente ao Facebook_.**
+
+Haveria como delimitar as buscas por data, por meio dos argumentos "since" e "until":
 
 ```{r}
 page <- getPage(page = "IFeakingLoveScience", 
@@ -113,10 +151,11 @@ page <- getPage(page = "IFeakingLoveScience",
 View(page)
 ```
 
+** Mas, novamente, o que obtemos como resposta é um erro **.
 
-O argumento "feed" incluirá na busca as postagens feitas por outros usuários na página. Finalmente, "reactions" incluirá variáveis detalhadas sobre cada reação em vez da simples contagem.
+O argumento "feed" incluiria na busca as postagens feitas por outros usuários na página. Finalmente, "reactions" incluiria variáveis detalhadas sobre cada reação em vez da simples contagem.
 
-O funcionamnto de _getGroups_ é bastante semelhante. No exemplo abaixo, vamos pegar as postagens da comunidade brasileira de pessoas que programam em R., [aqui](https://www.facebook.com/groups/1410023525939155/). Veja que o "nome do usuário" de um grupo é um número, e deve ser incluído no argumento "group_id":
+O funcionamnto de _getGroups_ seria bastante semelhante. O exemplo abaixo seria para raspar as postagens da comunidade brasileira de pessoas que programam em R., [aqui](https://www.facebook.com/groups/1410023525939155/). Veja que o "nome do usuário" de um grupo é um número, e deveria ser incluído no argumento "group_id":
 
 ```{r}
 group <- getGroup(group_id = "1410023525939155",
@@ -126,3 +165,5 @@ View(group)
 ```
 
 _getGroups_ também aceita os argumentos "since", "until" e "feed", mas não o argumento "reactions".
+
+** Mas esses são novos tempos... Sem o devido registro e permissões de privacidade, não há como fazer raspagens no Facebook. Isso é excelente para os usuários.** Se você realmente tiver interesse em baixar dados do Facebook por essa via, recomendamos que você estude os termos da Política de Privacidade e faça de fato o registro formal. Mas isso ultrapassa o escopo deste tutorial.
