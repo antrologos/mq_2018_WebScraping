@@ -11,65 +11,81 @@ Há um bom tutorial sobre no [repositório do pacote _Rfacebook_](https://github
 
 ## O pacote _Rfacebook_
 
-Vamos começar carregando e instalando o pacote:
+Vamos começar instalando o pacote:
 
-```{r}
+```{r, eval = F}
 install.packages("Rfacebook")
+```
+
+E agora podemos carregá-lo:
+
+```{r, message=FALSE}
 library(Rfacebook)
 ```
 
-O primeiro passo para obter dados do facebook é criar uma conta de desenvolvedor(a). Se você tem uma conta no facebook, clique [aqui](https://developers.facebook.com/), faça login e configure sua conta de desenvolvedor(a). 
+O primeiro passo para obter dados do facebook é criar uma **conta de desenvolvedor(a)**. Se você tem uma conta no facebook, clique [aqui](https://developers.facebook.com/), faça login (sim... você tem que ter uma conta do facebook...) e configure sua conta de desenvolvedor(a). Clique em "Introdução" e informe os dados requisitados. Em especial, será necessário que você informe seu número de telefone... Sim, sabemos, nem todos estarão dispostos a isso. Mas essa é a política da empresa Facebook: para permitir que você raspe os dados dela, deve estar cadastrado. Com isso, ele sabe quem está utilizando essa ferramenta e pode proteger os usuários comuns (não desenvolvedores). No entanto, trata-se de outra coisa também: **enquanto você quer coletar os dados do Facebook, ele também quer coletar os seus!**
 
-O autor do pacote recomenda este [tutorial](http://thinktostart.com/analyzing-facebook-with-r/) para fazer a preparação do acesso à API. Explico rapidamente os passos abaixo e você pode recorrer a ele para ver imagens de telas (desatualizadas e em inglês) que podem ajudar.
+O autor do pacote Rfacebook recomenda este [tutorial](http://thinktostart.com/analyzing-facebook-with-r/) para fazer a preparação do acesso à API. Já está um pouco desatualizado... afinal, o Facebook frequentemente faz mudanças em seu site. Há pequenas diferenças entre o que está no tutorial e como o site é atualmente (verificação feita em 25/07/2018). Mas serve ainda como um bom guia para os aspectos mais gerais.
+
+Explicaremos rapidamente o que você deve fazer depois de ter criado sua conta de desenvolvedor. Siga os passos abaixo.
 
 * 1- Clique no botão "Criar aplicativo"
 
-* 2- Dê um nome para seu aplicativo em "Nome de exibição" e clique em "Crie um número de identificação do aplicativo". Sobreviva ao "captcha" e confirma a criação.
+* 2- Dê um nome para seu aplicativo em "Nome de exibição" e informe seu e-mail. clique em "Crie um número de identificação do aplicativo". Digite os estranhos caracteres do "captcha" e confirme a criação.
 
-* 3- No "Painel" do aplicativo você verá a Versão da API, o ID do Aplicativo e a Chave Secreta do Aplicativo. Clique em "Mostrar" para exibir a chave secreta e anote os números do id e da chave secreta em dois vetores diferentes (substitua o "888"): 
+* 3 - O "ID do Aplicativo" vai ter sido criado. E você será dirigido a uma nova página. Lá você vai ter que escolher o tipo de aplicativo. Escolha a oção "Login do Facebook" e clique em "Configurar".
+
+* 4 - Agora, depois direcionado para mais uma página, escolha "Web". No campo "URL do Site", escreva: "http://localhost:1410/". Isso apenas serve para dizer que você não está criando de fato um aplicativo que possui uma página de internet própria. Você está, na realidade, abrindo uma porta do seu computador e o Facebook. Clique em "Save"
+
+* 5- No "Painel" do aplicativo (barra de opções à esquerda), clique em "Configurações" e então em "Básico". Lá você verá a ID do Aplicativo e sua Chave Secreta. Essas são as informações necessárias para que o R se conecte ao Facebook. Clique no botão "Mostrar" para visualizar a Chave Secreta e então copie os dois números que estão lá (é possível que o Facebook peça para você digitar sua senha novamente). Copie os dois números para cá, substituindo os campos "XXXXXXXXXXXXXXX" e "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" abaixo: 
 
 ```{r}
-app_id <- "888"
-app_secret <- "888"
+app_id     <- "XXXXXXXXXXXXXXX"
+app_secret <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 ```
 
-* 4- Vá em "Conigurações" e clique no botão "+ Adicionar plataforma" na parte inferior. Escolha "Site" e insira no campo "URL do site" o seguinte endereço: http://localhost:1410/ . Clique em "Salva Alterações"
+**Pronto! Seu aplicativo foi criado. Agora você tem uma porta de acesso (uma espécie de 'login') para entrar no Facebook via R. Você não precisa mais executar os passos de 1 a 5 novamente. Da próxima vez, comece a partir daqui**.
 
-* 5- Pronto! Vamos agora fazer a autenticação de dentro do R:
+* 6 - Agora execute: 
 
 ```{r}
-fb_oauth <- fbOAuth(app_id = app_id, 
-                    app_secret = ,
+fb_oauth <- fbOAuth(app_id     = app_id, 
+                    app_secret = app_secret, 
                     extended_permissions = TRUE)
 ```
 
-* 6- Siga as instruções que aparecerem no console (a primeira já está feita, que é colar o URL do site). Clique em qualquer tecla. Você será redirecionado ao navegador para conceder algumas permissões no seu perfil. 
+* 7 - No console do R, você receberá a seguinte mensagem: "Copy and paste into Site URL on Facebook App Settings: http://localhost:1410/. When done, press any key to continue...". Se você seguiu o Passo 4 (acima), está tudo certo. Aperte qualquer tecla do seu computador, tal como o R está pedindo. Uma janela do seu navegador vai então se abrir --  pedindo para você autorizar que seu aplicativo acesse seus dados do Facebook. Autorize! (Afinal, é você mesmo que vai acessar esses dados. Não se preocupe!).
 
-* 7- É interessante salvar o objeto de autenticação em uma pasta do seu computador. Você poderá reutilizá-lo sempre que quiser para evitar fazer todas as vezes o processo de autenticação.
-
-```{r}
-save(fb_oauth, file="fb_oauth")
-load("fb_oauth")
-```
-
-Alternativamente à autenticação com Id e chave secreta, podemos utilizar o token de acesso para acessar a API. Ele dura por duas horas, apenas. Depois disso é preciso renová-lo.
-
-Clique [aqui](https://developers.facebook.com/tools/explorer). Na página à qual você será redirecionad@, você poderá copiar o "Token de acesso". Durante a aula, deixarei um token válido para vocês explorarem minha conta.
+É interessante salvar o objeto de autenticação em uma pasta do seu computador. Você poderá reutilizá-lo sempre que quiser para evitar fazer todas as vezes o processo de autenticação:
 
 ```{r}
-token_acesso <- 'EAACEdEose0cBAKJgbGubZCMUagDwq3ZAIlVrpuZAlCRPGCEqF7qjlSpaRbEqQOUHh8jsHyNTQxU3aj4ZCNw5r3xyrV2Jd2Qv5wvScOkLCGRBsVWgjvdoOZB7t3VZBEdrsrvDar30CIGUkV1dkNklJoC6MHSuFpBp0nWe4O7LH4q2po0ovKBxiL6sH5ZCd8cyhcZD'
+save(fb_oauth, file="/users/rogerio/Google Drive/fb_oauth")
+load("/users/rogerio/Google Drive/fb_oauth")
 ```
 
-Não se frustre se não der certo a primeira vez (não deu para mim). Recomece o processo e leia o tutorial que indiquei.
+**Se você salvar esse objeto contendo as informações de acesso, você pode saltar todos os passos anteriores, começando direto de load()!**
+
+Alternativamente à autenticação com Id e chave secreta, podemos utilizar o token de acesso para acessar a API. Trata-se de uma espécie de passaporte de acesso temporário, que dura por duas horas apenas. Depois disso é preciso renová-lo. Essa é uma forma controlada de garantir acesso ao aplicativo.
+
+Para gerar um token, clique [aqui](https://developers.facebook.com/tools/explorer). Na página à qual você será redirecionad@, você poderá gerar um "Token de acesso". No botão "Obter Token" e selecione a opção "Obter token do aplicativo". Um número será gerado. É só copiá-lo aqui:
+
+```{r}
+token_acesso <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+```
+
+Durante a aula, deixaremos um token válido para vocês. Não se frustrem se não der certo a primeira vez. Os passos são realmente chatos e muito cheios de detalhes. Recomecem o processo e leiam o tutorial indicado.
 
 ## Obtendo dados com Rfacebook
 
-Vamos ver basicamente 3 funções do pacote _Rfacebook_: _getUsers_, _getPage_ e _getGroup_, que retornam, respectivamente, os dados sobre você (ou sobre um outro usuário vinculado ao seu aplicativo - não funciona para os demais), sobre uma página pública ou sobre um grupo ao qual você pertence.
+Vamos ver basicamente 3 funções do pacote _Rfacebook_: 
+- `getUsers` : retorna os dados sobre você (ou sobre um outro usuário vinculado ao seu aplicativo - não funciona para os demais usuários do Facebook)
+- `getPage` : retorna os dados sobre uma página pública 
+- `getGroup` : retorna os dados sobre um grupo ao qual você pertence
 
-Sobre você :
+Para coletar os dados sobre você então, faça o seguinte:
 
 ```{r}
-me <- getUsers("me", token)
+me <- getUsers("me", token = token_acesso)
 View(page)
 ```
 
