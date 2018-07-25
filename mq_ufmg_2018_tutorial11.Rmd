@@ -164,6 +164,6 @@ group <- getGroup(group_id = "1410023525939155",
 View(group)
 ```
 
-_getGroups_ também aceita os argumentos "since", "until" e "feed", mas não o argumento "reactions".
+_getGroups_ também aceita os argumentos "since", "until" e "feed", mas não o argumento "reactions". 
 
 ** Mas esses são novos tempos... Sem o devido registro e permissões de privacidade, não há como fazer raspagens no Facebook. Isso é excelente para os usuários.** Se você realmente tiver interesse em baixar dados do Facebook por essa via, recomendamos que você estude os termos da Política de Privacidade e faça de fato o registro formal. Mas isso ultrapassa o escopo deste tutorial.
