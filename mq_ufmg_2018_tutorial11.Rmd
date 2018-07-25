@@ -3,7 +3,7 @@ _Autor_: Leonardo Sangali Barone
 
 _Revisão_: Rogério Jerônimo Barbosa
 
-Neste breve tutorial vamos ver como acessar a API do facebook com R e obter dados informaçõs sobre um conjunto limitado de postagens.
+Neste breve tutorial vamos ver como acessar a API do facebook com R e obter dados informações sobre um conjunto limitado de postagens.
 
 Diferentemente do twitter, o facebook restringe os dados que podem ser acessados via API. Os únicos dados que conseguimos capturar com o pacote _Rfacebook_ e que os interessam para fins de pesquisa são as postagens de páginas públicas e grupos aos quais pertencemos.
 

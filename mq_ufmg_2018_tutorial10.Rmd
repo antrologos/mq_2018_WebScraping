@@ -9,7 +9,7 @@ Finalmente, vamos ver como converter arquivos de .pdf digitalizados, ou seja, qu
 
 ## Pacote _pdftools_
 
-Até agora trabalhamos apenas com infomações em páginas em HTML que. Dada as marcações de um texto em HTML, conseguíamos com poucas funções impotar um documento, identificar sua estrutura e extrair infomações com precisão de dentro dele. O pacote _rvest_ contém tais funções é suficiente para a tarefa.
+Até agora trabalhamos apenas com infomações em páginas em HTML. Dada as marcações de um texto em HTML, conseguíamos com poucas funções importar um documento, identificar sua estrutura e extrair infomações com precisão de dentro dele. O pacote _rvest_ contém tais funções é suficiente para a tarefa.
 
 Com arquivos em .pdf, porém, precisaremos de outra ferramenta e outra estratégia de organização de dados. Nosso primeiro passo será utilizar o pacote _pdftools_ para transformar arquivos em .pdf em objetos de texto no R.
 
@@ -20,10 +20,10 @@ install.packages("pdftools")
 library(pdftools)
 ```
 
-A principal função do pacote _pdftools_ é _pdf\_text_. Esta função recebe como argumento o caminho de um arquivo em .pdf, seja em uma pasta de seu computador ou na internet. Vamos utilizar como exemplos o documento com a proposição em inteiro teor da última PEC apresentada na data em que o tutorial foi elaborado e, a seguir, minha tese de doutorado defendida em 2014 na FGV-SP. Veja o uso da função é simples:
+A principal função do pacote _pdftools_ é _pdf\_text_. Esta função recebe como argumento o caminho de um arquivo em .pdf, seja em uma pasta de seu computador ou na internet. Vamos utilizar como exemplos o documento com a proposição em inteiro teor da última PEC apresentada na data em que o tutorial foi elaborado (24/07/2018) e, a seguir, a tese de doutorado do autor principal deste tutorial, Leonardo Barone. Veja o uso da função é simples:
 
 ```{r}
-url_ultima_pec <- "http://www.camara.gov.br/proposicoesWeb/prop_mostrarintegra;jsessionid=500EB6A69A190D8AEE117D22C6B3DFF9.proposicoesWebExterno2?codteor=1579429&filename=PEC+350/2017"
+url_ultima_pec <- "http://www.camara.gov.br/proposicoesWeb/prop_mostrarintegra;jsessionid=CA2368955586C1D76CDAD5CF042D0DE2.proposicoesWebExterno2?codteor=1677577&filename=PEC+437/2018"
 
 ultima_pec <- pdf_text(url_ultima_pec)
 
@@ -41,7 +41,7 @@ Em primeiro lugar, note que os objetos criados são vetores de texto (classe "ch
 
 Antes de examinar seus conteúdos, note que os documenos têm tamanhos diferentes. Por que?
 
-Ao convertermos o arquivo em .pdf em um vetor de texto no R, cada página é alocada em uma posição do vetor. A proposição da PEC tem 5 páginas. Minha tese, 178.
+Ao convertermos o arquivo em .pdf em um vetor de texto no R, cada página é alocada em uma posição do vetor. A proposição da PEC tem 17 páginas. A tese, 178.
 
 Veja a primeira página da proposição da PEC:
 
@@ -63,9 +63,11 @@ Vamos combinar o que aprendemos até agora de webscraping com o pacote _pdftools
 
 ```{r}
 library(rvest)
+library(dplyr)
 
 url_busca <- "http://www.camara.leg.br/buscaProposicoesWeb/resultadoPesquisa?emtramitacao=Todas&noorgao=&valueOrigem=-1&siglaorigem=&orgaoorigem=&naementa=true&indexacao=true&inteiroteor=false&tipoproposicao=%5BPEC++++++++-+Proposta+de+Emenda+%C3%A0+Constitui%C3%A7%C3%A3o%5D&dataInicialApresentacao=01/07/2017&dataFinalApresentacao=31/07/2017&partidoautor=&ufautor=&tramitacaoorgao=&partidorelator=&ufrelator=&comissaorelator=&data=03/08/2017&page=true"
 ```
+
 Nosso segundo passo será capturar os URLs de cada proposição. A essa altura do curso você já deve estar acostumad@ com isso:
 
 ```{r}
@@ -92,18 +94,17 @@ Note que os URLs dos documentos de inteiro teor capturados precisam de um pequen
 texto_pecs <- c()
 
 for (u in urls_pecs) {
-
+  print(u)
   pagina <- read_html(u)
   
-  inteiro_teor <- pagina %>%
+  link_inteiro_teor <- pagina %>%
     html_nodes(xpath = "//span[@class = 'naoVisivelNaImpressao']/a[@class='rightIconified iconDetalhe linkDownloadTeor']") %>%
     html_attr(name = 'href')
     
-  inteiro_teor <- paste0("http://www.camara.gov.br/proposicoesWeb/",
-           inteiro_teor)
+  link_inteiro_teor <- paste0("http://www.camara.gov.br/proposicoesWeb/",
+           link_inteiro_teor)
   
-  texto <- pdf_text(inteiro_teor)
-    
+  texto <- pdf_text(link_inteiro_teor)
   texto <- paste(texto, collapse = "")
   
   texto_pecs <- c(texto_pecs, texto)
@@ -112,7 +113,8 @@ for (u in urls_pecs) {
 Temos, assim, dois vetores de tamanho 10, um com os números e outro com os textos das 10 PECs. Vamos organizá-los em um data frame.
 
 ```{r}
-df_pec <- data.frame(num_pec, texto_pec)
+num_pecs <- 1:10
+df_pec   <- data_frame(num_pecs, texto_pecs)
 ```
 
 Pronto! Os próximos passos lógicos seriam extrair o que nos interessa dos textos (justificação? texto legal? cabeçalho?) com o pacote _stringr_ e produzir análises. Você pode ler como fazer isso nos tutoriais sobre mineração de texto.
